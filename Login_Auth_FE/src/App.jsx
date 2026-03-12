@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { io } from "socket.io-client";
 import Register from "./components/auth/Register";
@@ -12,8 +12,8 @@ import JoinRoomPage from "./pages/JoinRoomPage";
 import VideoRoomPage from "./pages/VideoRoomPage";
 import "./App.css";
 
-// ✅ MeetHub server socket (runs on port 5000)
-const meetSocket = io("http://localhost:5000", { autoConnect: false });
+// ✅ Connect to MeetingServer on port 5000
+const meetSocket = io("http://localhost:5000");
 
 function App() {
   return (
@@ -27,7 +27,7 @@ function App() {
         <Route path="/flashcards" element={<FlashcardsPage />} />
         <Route path="/pomodoro" element={<PomodoroPage />} />
 
-        {/* ✅ Video Room routes — all paths lead to JoinRoomPage */}
+        {/* ✅ Video Room routes */}
         <Route path="/join-room" element={<JoinRoomPage />} />
         <Route path="/video-rooms" element={<JoinRoomPage />} />
         <Route path="/study-rooms" element={<JoinRoomPage />} />

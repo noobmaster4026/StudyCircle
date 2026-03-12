@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "backend": "cd Backend && npm run dev",
-    "frontend": "cd Login_Auth_FE && npm run dev"
-  },
+"scripts": {
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "dev": "concurrently \"npm run backend\" \"npm run meeting\" \"npm run frontend\"",
+  "backend": "cd Backend && npm run dev",
+  "meeting": "cd MeetingServer && node index.js",
+  "frontend": "cd Login_Auth_FE && npm run dev"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
