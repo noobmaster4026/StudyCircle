@@ -7,6 +7,8 @@ const User = require('./src/models/user');
 const bcrypt = require('bcryptjs');
 const Goal = require('./src/models/goal');
 const Flashcard = require('./src/models/Flashcard');
+const courseRoutes = require("./src/routes/courseRoutes");
+const indInfoRoutes = require("./src/routes/indInfoRoutes");
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
@@ -16,6 +18,8 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use("/api", routes);
+app.use("/api/courses", courseRoutes);
+app.use("/api/ind-infos", indInfoRoutes);
 
 // Login
 app.post("/api/login", async (req, res) => {

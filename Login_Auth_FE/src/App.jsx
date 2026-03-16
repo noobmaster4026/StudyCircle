@@ -10,9 +10,9 @@ import FlashcardsPage from "./pages/FlashcardsPage";
 import PomodoroPage from "./pages/PomodoroPage";
 import JoinRoomPage from "./pages/JoinRoomPage";
 import VideoRoomPage from "./pages/VideoRoomPage";
+import NotesPage from "./pages/NotesPage";   // ← add this
 import "./App.css";
 
-// ✅ Connect to MeetingServer on port 5000
 const meetSocket = io("http://localhost:5000", {
   autoConnect: false,
   reconnection: true,
@@ -29,8 +29,7 @@ function App() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/flashcards" element={<FlashcardsPage />} />
         <Route path="/pomodoro" element={<PomodoroPage />} />
-
-        {/* ✅ Video Room routes */}
+        <Route path="/notes" element={<NotesPage />} />         {/* ← add this */}
         <Route path="/join-room" element={<JoinRoomPage />} />
         <Route path="/video-rooms" element={<JoinRoomPage />} />
         <Route path="/study-rooms" element={<JoinRoomPage />} />
