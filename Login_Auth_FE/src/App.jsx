@@ -13,7 +13,10 @@ import VideoRoomPage from "./pages/VideoRoomPage";
 import "./App.css";
 
 // ✅ Connect to MeetingServer on port 5000
-const meetSocket = io("http://localhost:5000");
+const meetSocket = io("http://localhost:5000", {
+  autoConnect: false,
+  reconnection: true,
+});
 
 function App() {
   return (
