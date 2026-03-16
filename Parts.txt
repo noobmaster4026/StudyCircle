@@ -23,9 +23,9 @@ Document Scanner (OCR)(2)
 Study Analytics Dashboard
 
 Me:
-User Authentication System
-Study Goals & Progress(1)
-Video Call Study Rooms(2)
+User Authentication System✅
+Study Goals & Progress(1)✅
+Video Call Study Rooms(2)✅
 AI Quiz Generator from Notes
 AI Study Group Matching
 Shared Digital Whiteboard
