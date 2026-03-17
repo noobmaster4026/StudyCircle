@@ -1,0 +1,31 @@
+Parts:
+
+Raian:
+Course & Subject Selection(1)
+Create/Join Study Sessions 
+AI Study Schedule Generator 
+Tutor Marketplace
+Peer Rating System
+
+
+Saiyara:
+Notes Upload & Sharing
+AI Doubt Solver Chatbot
+Study Streak Tracker & Achievement Badges(1)
+Study Reminders
+Categorized Resource Bookmarks
+
+Shahriar:
+Flashcard Creator(1)
+Pomodoro Timer(1)
+AI Study Recommendations
+Document Scanner (OCR)(2)
+Study Analytics Dashboard
+
+Me:
+User Authentication System✅
+Study Goals & Progress(1)✅
+Video Call Study Rooms(2)✅
+AI Quiz Generator from Notes
+AI Study Group Matching
+Shared Digital Whiteboard
