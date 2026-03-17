@@ -6,12 +6,10 @@
   min-height: 100vh;
 }
 
-/* Navbar */
+/* ── Navbar ── */
 .navbar {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   z-index: 1000;
   display: flex;
   justify-content: space-between;
@@ -20,6 +18,18 @@
   background: rgba(5, 5, 5, 0.85);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.logoWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logoImg {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
 }
 
 .logo {
@@ -43,21 +53,6 @@
   font-weight: 600;
 }
 
-.goalsBtn {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.goalsBtn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
 .logoutBtn {
   background: #b3ff00;
   color: #050505;
@@ -68,12 +63,9 @@
   cursor: pointer;
   transition: opacity 0.3s;
 }
+.logoutBtn:hover { opacity: 0.85; }
 
-.logoutBtn:hover {
-  opacity: 0.85;
-}
-
-/* Hero */
+/* ── Hero ── */
 .hero {
   height: 100vh;
   display: flex;
@@ -93,10 +85,7 @@
   animation: textReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: 0.3s;
 }
-
-.revealText span {
-  color: #b3ff00;
-}
+.revealText span { color: #b3ff00; }
 
 .scrollIndicator {
   position: absolute;
@@ -107,7 +96,7 @@
   animation: bounce 2s infinite;
 }
 
-/* Stack Area */
+/* ── Stack area ── */
 .stackArea {
   padding-bottom: 20vh;
   max-width: 1000px;
@@ -117,7 +106,7 @@
   padding-right: 20px;
 }
 
-/* Card */
+/* ── Card base ── */
 .card {
   height: 400px;
   position: sticky;
@@ -137,10 +126,11 @@
 }
 
 .card1 { background: linear-gradient(145deg, #1a1a1a, #0d0d0d); }
-.card2 { background: linear-gradient(145deg, #222, #111); }
+.card2 { background: linear-gradient(145deg, #222,    #111);    }
 .card3 { background: linear-gradient(145deg, #2a2a2a, #151515); }
-.card4 { background: linear-gradient(145deg, #333, #1a1a1a); }
+.card4 { background: linear-gradient(145deg, #333,    #1a1a1a); }
 .card5 { background: linear-gradient(145deg, #1a1a2e, #0d0d1a); }
+.card6 { background: linear-gradient(145deg, #1a2a1a, #0d1a0d); }
 
 .cardContent {
   flex: 1;
@@ -182,21 +172,15 @@
   cursor: pointer;
   transition: opacity 0.3s, transform 0.2s;
 }
-
-.cardBtn:hover {
-  opacity: 0.85;
-  transform: translateY(-2px);
-}
+.cardBtn:hover { opacity: 0.85; transform: translateY(-2px); }
 
 .cardImg {
   flex: 1;
   height: 100%;
   background: #000;
   border-radius: 12px;
-  position: relative;
   overflow: hidden;
 }
-
 .cardImg img {
   width: 100%;
   height: 100%;
@@ -204,13 +188,9 @@
   opacity: 0.8;
   transition: transform 0.6s ease;
 }
+.card:hover .cardImg img { transform: scale(1.1); opacity: 1; }
 
-.card:hover .cardImg img {
-  transform: scale(1.1);
-  opacity: 1;
-}
-
-/* Footer */
+/* ── Footer ── */
 .footer {
   height: 20vh;
   display: flex;
@@ -220,230 +200,17 @@
   font-size: 0.9rem;
 }
 
-/* Animations */
+/* ── Animations ── */
 @keyframes textReveal {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes bounce {
   0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-10px); }
-  60% { transform: translateY(-5px); }
+  40%  { transform: translateY(-10px); }
+  60%  { transform: translateY(-5px); }
 }
 
-/* Logo */
-.logoWrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.logoImg {
-  width: 35px;
-  height: 35px;
-  object-fit: contain;
-}
-
-/* ── My Courses Panel (inside card3) ────────────────────────── */
-.coursesPanel {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 16px 18px;
-  max-width: 340px;
-  margin-top: 8px;
-}
-
-.coursesPanelHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.coursesPanelTitle {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.coursesPanelSub {
-  margin: 3px 0 0;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.coursesDots {
-  display: flex;
-  gap: 5px;
-}
-
-.coursesDot {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  transition: background 0.2s;
-}
-
-.coursesList {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  margin-bottom: 10px;
-}
-
-.courseItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(179, 255, 0, 0.06);
-  border: 1px solid rgba(179, 255, 0, 0.2);
-  border-radius: 10px;
-  padding: 7px 11px;
-}
-
-.courseCode {
-  font-size: 10px;
-  font-weight: 700;
-  color: #b3ff00;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.courseName {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.dropBtn {
-  background: none;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 11px;
-  padding: 3px 8px;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  font-family: inherit;
-}
-
-.dropBtn:hover {
-  color: rgba(255, 255, 255, 0.7);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.coursesEmpty {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.3);
-  margin: 6px 0 10px;
-}
-
-.addCourseBtn {
-  width: 100%;
-  padding: 8px;
-  background: rgba(179, 255, 0, 0.12);
-  border: 1px solid rgba(179, 255, 0, 0.3);
-  border-radius: 10px;
-  color: #b3ff00;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
-}
-
-.addCourseBtn:hover {
-  background: rgba(179, 255, 0, 0.2);
-}
-
-.addCourseBtnCancel {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.coursesMaxMsg {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
-  text-align: center;
-  margin-top: 8px;
-}
-
-.pickerDropdown {
-  margin-top: 8px;
-}
-
-.pickerSearch {
-  width: 100%;
-  padding: 7px 10px;
-  margin-bottom: 7px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: white;
-  font-size: 12px;
-  font-family: inherit;
-  outline: none;
-  box-sizing: border-box;
-}
-
-.pickerSearch::placeholder {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-.pickerList {
-  max-height: 160px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.pickerItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 8px;
-  padding: 6px 10px;
-}
-
-.pickerCode {
-  font-size: 10px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.4);
-  text-transform: uppercase;
-}
-
-.pickerName {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.addBtn {
-  background: #b3ff00;
-  border: none;
-  border-radius: 6px;
-  color: #0a0a0a;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 10px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: opacity 0.2s;
-}
-
-.addBtn:hover {
-  opacity: 0.85;
-}
-
-/* Mobile */
+/* ── Mobile ── */
 @media (max-width: 768px) {
   .revealText { font-size: 3rem; }
 
@@ -462,14 +229,7 @@
   }
 
   .card h2 { font-size: 2rem; }
-  .card p { font-size: 1rem; }
+  .card p  { font-size: 1rem; }
 
-  .cardImg {
-    height: 250px;
-    width: 100%;
-  }
-
-  .coursesPanel {
-    max-width: 100%;
-  }
+  .cardImg { height: 250px; width: 100%; }
 }
