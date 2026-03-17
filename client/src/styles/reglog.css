@@ -1,0 +1,445 @@
+/* ──────────────────────────────────────────────
+   reglog.css  —  StudyCircle Auth Page Styles
+   White / Minimal / Modern aesthetic
+────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ── Root / Reset ── */
+.rl-root {
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9f9fb;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Soft background blobs ── */
+.rl-bg-blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.rl-blob1 {
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, #c4b5fd 0%, #a78bfa 60%, transparent 100%);
+  top: -160px;
+  right: -160px;
+}
+
+.rl-blob2 {
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, #bfdbfe 0%, #93c5fd 60%, transparent 100%);
+  bottom: -120px;
+  left: -120px;
+}
+
+/* ── Card ── */
+.rl-card {
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 8px 32px rgba(108, 99, 255, 0.08),
+    0 32px 64px rgba(0, 0, 0, 0.06);
+  width: 100%;
+  max-width: 460px;
+  padding: 2.8rem 2.6rem;
+  transition: all 0.3s ease;
+}
+
+/* ── Fade animation ── */
+@keyframes rl-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rl-fade {
+  animation: rl-fade-in 0.35s ease both;
+}
+
+/* ── Back button ── */
+.rl-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.6rem;
+  transition: color 0.2s;
+}
+
+.rl-back-btn:hover {
+  color: #444;
+}
+
+/* ── Brand / Logo ── */
+.rl-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+}
+
+.rl-logo-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.rl-brand-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  letter-spacing: -0.3px;
+}
+
+/* ── Typography ── */
+.rl-heading {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #0f0f23;
+  letter-spacing: -0.8px;
+  line-height: 1.15;
+  margin: 0 0 0.5rem 0;
+}
+
+.rl-subtext {
+  font-size: 0.93rem;
+  color: #8a8a9a;
+  margin: 0 0 2.4rem 0;
+  line-height: 1.6;
+}
+
+/* ── CTA buttons ── */
+.rl-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.rl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.85rem 1.6rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  letter-spacing: -0.1px;
+}
+
+.rl-btn-primary {
+  background: #6C63FF;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(108, 99, 255, 0.35);
+}
+
+.rl-btn-primary:hover {
+  background: #5a52e0;
+  box-shadow: 0 6px 20px rgba(108, 99, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+.rl-btn-primary:active {
+  transform: translateY(0);
+}
+
+.rl-btn-outline {
+  background: transparent;
+  color: #6C63FF;
+  border: 1.5px solid #e2dfff;
+}
+
+.rl-btn-outline:hover {
+  background: #f4f3ff;
+  border-color: #c4b5fd;
+}
+
+/* ── Role grid ── */
+.rl-role-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-bottom: 1.8rem;
+}
+
+.rl-role-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #fafafa;
+  border: 1.5px solid #eeeeee;
+  border-radius: 16px;
+  padding: 1.1rem 1.2rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.22s ease;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+}
+
+.rl-role-card:hover {
+  border-color: #c4b5fd;
+  background: #f8f5ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(108, 99, 255, 0.1);
+}
+
+.rl-role-icon {
+  flex-shrink: 0;
+}
+
+.rl-role-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  display: block;
+  letter-spacing: -0.2px;
+}
+
+.rl-role-desc {
+  font-size: 0.8rem;
+  color: #9a9aaa;
+  display: block;
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+.rl-role-arrow {
+  margin-left: auto;
+  font-size: 1.2rem;
+  color: #c4b5fd;
+  transition: transform 0.2s;
+}
+
+.rl-role-card:hover .rl-role-arrow {
+  transform: translateX(4px);
+  color: #6C63FF;
+}
+
+/* ── Role badge ── */
+.rl-role-badge {
+  margin-bottom: 0.6rem;
+}
+
+.rl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3em 0.8em;
+  border-radius: 99px;
+  letter-spacing: 0.2px;
+}
+
+.rl-badge-student {
+  background: #ede9fe;
+  color: #6C63FF;
+}
+
+.rl-badge-teacher {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+/* ── Form ── */
+.rl-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.rl-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.rl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.rl-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #555568;
+  letter-spacing: 0.1px;
+}
+
+.rl-input-wrap {
+  position: relative;
+}
+
+.rl-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #e8e8f0;
+  border-radius: 11px;
+  font-size: 0.92rem;
+  font-family: 'Inter', sans-serif;
+  color: #1a1a2e;
+  background: #fdfdfe;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.rl-input:focus {
+  border-color: #6C63FF;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+  background: #fff;
+}
+
+.rl-input::placeholder {
+  color: #c0c0cc;
+}
+
+.rl-input-wrap .rl-input {
+  padding-right: 2.8rem;
+}
+
+.rl-eye-btn {
+  position: absolute;
+  right: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.rl-eye-btn:hover {
+  opacity: 1;
+}
+
+/* ── Forgot row ── */
+.rl-forgot-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+/* ── Link button ── */
+.rl-link-btn {
+  background: none;
+  border: none;
+  color: #6C63FF;
+  font-size: inherit;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+  text-decoration: none;
+}
+
+.rl-link-btn:hover {
+  color: #4f46e5;
+  text-decoration: underline;
+}
+
+/* ── Switch text ── */
+.rl-switch-text {
+  text-align: center;
+  font-size: 0.87rem;
+  color: #9a9aaa;
+  margin: 0;
+}
+
+/* ── Footer note ── */
+.rl-footer-note {
+  text-align: center;
+  font-size: 0.78rem;
+  color: #c0c0cc;
+  margin: 0;
+}
+
+/* ── Alert banners ── */
+.rl-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+  animation: rl-fade-in 0.25s ease both;
+}
+
+.rl-alert-error {
+  background: #fff0f0;
+  color: #d93030;
+  border: 1px solid #fcc;
+}
+
+.rl-alert-error::before {
+  content: '⚠ ';
+}
+
+.rl-alert-success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.rl-alert-success::before {
+  content: '✓ ';
+}
+
+/* ── Disabled / loading state ── */
+.rl-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Responsive ── */
+@media (max-width: 500px) {
+  .rl-card {
+    padding: 2rem 1.4rem;
+    border-radius: 18px;
+  }
+
+  .rl-heading {
+    font-size: 1.8rem;
+  }
+}
