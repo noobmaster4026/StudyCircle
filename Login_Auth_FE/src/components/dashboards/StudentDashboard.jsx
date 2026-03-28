@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import GoalsDrawer from "../GoalsDrawer";
 import styles from "./StudentDashboard.module.css";
 import VideoRoomCard from "../VideoRoomCard";
+import NotificationBell from "../NotificationBell";
 
 function StudentDashboard() {
   const userName = localStorage.getItem("userName") || "Student";
@@ -114,6 +115,7 @@ function StudentDashboard() {
         </div>
         <div className={styles.navRight}>
           <span className={styles.roleTag}>🎓 Student</span>
+          <NotificationBell />
           {/*<button className={styles.goalsBtn} onClick={() => setDrawerOpen(true)}>📚 Goals</button>*/}
           <button className={styles.logoutBtn} onClick={handleLogout}>Logout</button>
         </div>

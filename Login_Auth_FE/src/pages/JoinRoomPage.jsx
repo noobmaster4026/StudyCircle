@@ -16,6 +16,7 @@ const JoinRoomPage = () => {
 
   const [createTitle, setCreateTitle] = useState("");
   const [createPassword, setCreatePassword] = useState("");
+  const [createScheduledAt, setCreateScheduledAt] = useState("");
   const [createError, setCreateError] = useState("");
   const [createLoading, setCreateLoading] = useState(false);
 
@@ -52,7 +53,7 @@ const JoinRoomPage = () => {
       const res = await fetch(`${MEETING_SERVER}/api/meetings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomId, password: createPassword, title: createTitle || "Study Room", host: userName }),
+        body: JSON.stringify({ roomId, password: createPassword, title: createTitle || "Study Room", host: userName, hostUserId: userId, scheduledAt: createScheduledAt || null }),
       });
       const data = await res.json();
       if (!res.ok) return setCreateError(data.message || "Failed to create.");
@@ -189,6 +190,17 @@ const JoinRoomPage = () => {
                   onFocus={e => e.target.style.borderColor = "rgba(99,102,241,0.6)"}
                   onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
               </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>SCHEDULE FOR LATER (optional)</label>
+              <div style={{ position: "relative" }}>
+                <input type="datetime-local" value={createScheduledAt}
+                  onChange={e => setCreateScheduledAt(e.target.value)} style={{ ...inputStyle, paddingLeft: 14, colorScheme: 'dark' }}
+                  onFocus={e => e.target.style.borderColor = "rgba(99,102,241,0.6)"}
+                  onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
+              </div>
+              <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, margin: '4px 0 0 0' }}>Participants will receive a reminder before the session starts.</p>
             </div>
             {createError && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: "#f87171", fontSize: 13, margin: 0 }}>{createError}</motion.p>}
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleCreate} disabled={createLoading} style={{

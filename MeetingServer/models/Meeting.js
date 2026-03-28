@@ -19,6 +19,17 @@ const meetingSchema = new mongoose.Schema(
       type: String,
       default: "Host",
     },
+    hostUserId: {
+      type: String,
+      default: null,
+    },
+    // When the session is scheduled to start (null = start immediately / ad-hoc)
+    scheduledAt: {
+      type: Date,
+      default: null,
+    },
+    // Store participant userIds so cron can look up their emails
+    participantUserIds: [{ type: String }],
     participants: [
       {
         userId: String,

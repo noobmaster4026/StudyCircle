@@ -30,6 +30,12 @@ const userSchema = new mongoose.Schema({
     isBanned: {
         type: Boolean,
         default: false
+    },
+    reminderPreferences: {
+        emailReminders: { type: Boolean, default: true },
+        inAppReminders: { type: Boolean, default: true },
+        // reminder times in minutes before deadline: 15, 60, or 1440 (1 day)
+        reminderTimes: { type: [Number], default: [60] }
     }
 }, { timestamps: true });
 

@@ -3,13 +3,12 @@ const Meeting = require("../models/Meeting");
 // POST /api/meetings — create a new meeting
 exports.createMeeting = async (req, res) => {
   try {
-    const { roomId, password, title, host } = req.body;
+    const { roomId, password, title, host, hostUserId, scheduledAt } = req.body;
 
     if (!roomId || !password) {
       return res.status(400).json({ message: "roomId and password are required" });
     }
 
-    // Check if room already exists
     const existing = await Meeting.findOne({ roomId });
     if (existing) {
       return res.status(409).json({ message: "Room ID already exists. Try a different one." });
@@ -20,6 +19,9 @@ exports.createMeeting = async (req, res) => {
       roomId,
       password,
       host: host || "Host",
+      hostUserId: hostUserId || null,
+      scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
+      participantUserIds: hostUserId ? [hostUserId] : [],
       participants: [],
     });
 
@@ -27,6 +29,7 @@ exports.createMeeting = async (req, res) => {
       success: true,
       roomId: meeting.roomId,
       title: meeting.title,
+      scheduledAt: meeting.scheduledAt,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

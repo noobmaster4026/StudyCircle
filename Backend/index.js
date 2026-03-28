@@ -1,38 +1,48 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./src/config/db');
-const path = require('path');
 const routes = require('./src/routes/routes');
+const notificationRoutes = require('./src/routes/notificationRoutes');
 const User = require('./src/models/user');
 const bcrypt = require('bcryptjs');
 const Goal = require('./src/models/goal');
 const Flashcard = require('./src/models/Flashcard');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
 const multer = require('multer');
 const fs = require('fs');
+const startReminderService = require('./src/utils/reminderService');
 
 const app = express();
 
-connectDB();
-
+// 1. Middlewares (Must be at top level)
 app.use(cors());
 app.use(express.json());
-app.use("/api", routes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// 2. Routes
+app.use("/api", routes);
+app.use("/api/notifications", notificationRoutes);
+
+// 3. Connection and Services initialization
+connectDB().then(() => {
+    console.log('✅ MongoDB Connection Successful!');
+    console.log('✅ Services initialized after DB connection');
+    startReminderService();
+}).catch(err => {
+    console.error('❌ Failed to connect to DB:', err.message);
+    process.exit(1);
+});
 
 // Login
 app.post("/api/login", async (req, res) => {
     try {
         const { email, password } = req.body;
-
         const user = await User.findOne({ email });
         if (!user) return res.status(400).json({ message: "Email not found" });
-
         if (user.isBanned) return res.status(403).json({ message: "Your account has been banned" });
-
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: "Incorrect password" });
-
         res.status(200).json({
             message: "Login successful!",
             name: user.name,
@@ -58,11 +68,9 @@ app.get("/api/admin/users", async (req, res) => {
 app.put("/api/admin/ban/:id", async (req, res) => {
     try {
         const targetUser = await User.findById(req.params.id);
-
         if (targetUser.role === "admin") {
             return res.status(403).json({ message: "Admins cannot ban other admins" });
         }
-
         const user = await User.findByIdAndUpdate(
             req.params.id,
             { isBanned: req.body.isBanned },
@@ -78,11 +86,9 @@ app.put("/api/admin/ban/:id", async (req, res) => {
 app.delete("/api/admin/users/:id", async (req, res) => {
     try {
         const targetUser = await User.findById(req.params.id);
-
         if (targetUser.role === "admin") {
             return res.status(403).json({ message: "Admins cannot delete other admins" });
         }
-
         await User.findByIdAndDelete(req.params.id);
         res.status(200).json({ message: "User deleted" });
     } catch (error) {
@@ -95,6 +101,38 @@ app.get("/api/teachers", async (req, res) => {
     try {
         const teachers = await User.find({ role: "teacher" }, "-password");
         res.status(200).json(teachers);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Get a single user's profile (excluding password)
+app.get("/api/users/:id", async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id, "-password");
+        if (!user) return res.status(404).json({ message: "User not found" });
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Update a user's reminder preferences
+app.put("/api/users/:id/preferences", async (req, res) => {
+    try {
+        const { emailReminders, inAppReminders, reminderTimes } = req.body;
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            {
+                reminderPreferences: {
+                    emailReminders,
+                    inAppReminders,
+                    reminderTimes
+                }
+            },
+            { new: true, select: "-password" }
+        );
+        res.status(200).json({ message: "Preferences updated", user });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -207,17 +245,11 @@ app.delete("/api/flashcards/:id", async (req, res) => {
 });
 
 // --- Notes Upload & Sharing Routes ---
-// Ensure uploads directory exists
 const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-}
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-// Configure Multer storage
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
+    destination: (req, file, cb) => cb(null, 'uploads/'),
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, uniqueSuffix + path.extname(file.originalname));
@@ -226,23 +258,14 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 const Note = require('./src/models/Note');
 
-// Upload a note
 app.post('/api/notes', upload.single('file'), async (req, res) => {
     try {
         const { title, description, uploadedBy, course } = req.body;
-        if (!req.file) {
-            return res.status(400).json({ message: "No file uploaded" });
-        }
+        if (!req.file) return res.status(400).json({ message: "No file uploaded" });
         const fileUrl = `/uploads/${req.file.filename}`;
         const newNote = new Note({
-            title,
-            description,
-            fileUrl,
-            uploadedBy,
-            course,
-            fileName: req.file.originalname,
-            fileType: req.file.mimetype,
-            size: req.file.size
+            title, description, fileUrl, uploadedBy, course,
+            fileName: req.file.originalname, fileType: req.file.mimetype, size: req.file.size
         });
         await newNote.save();
         res.status(201).json(newNote);
@@ -251,13 +274,10 @@ app.post('/api/notes', upload.single('file'), async (req, res) => {
     }
 });
 
-// Get all notes (optionally filter by course)
 app.get('/api/notes', async (req, res) => {
     try {
         const query = {};
-        if (req.query.course) {
-            query.course = req.query.course;
-        }
+        if (req.query.course) query.course = req.query.course;
         const notes = await Note.find(query).sort({ createdAt: -1 }).populate('uploadedBy', 'name');
         res.json(notes);
     } catch (err) {
@@ -265,24 +285,18 @@ app.get('/api/notes', async (req, res) => {
     }
 });
 
-// Delete a note
 app.delete('/api/notes/:id', async (req, res) => {
     try {
         const note = await Note.findById(req.params.id);
         if (!note) return res.status(404).json({ message: "Note not found" });
-
         const filePath = path.join(__dirname, note.fileUrl);
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-        }
-
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         await Note.findByIdAndDelete(req.params.id);
         res.json({ message: "Note deleted" });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
-// -------------------------------------
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
