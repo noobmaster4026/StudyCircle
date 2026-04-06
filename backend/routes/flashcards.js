@@ -8,6 +8,7 @@ router.get('/', async (req, res) => {
     const cards = await Flashcard.find().sort({ createdAt: -1 });
     res.json(cards);
   } catch (err) {
+    console.error('Error:', err.message); // ADD THIS
     res.status(500).json({ message: err.message });
   }
 });

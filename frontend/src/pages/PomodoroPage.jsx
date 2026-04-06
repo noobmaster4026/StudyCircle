@@ -12,8 +12,7 @@ export default function PomodoroPage() {
   const [running, setRunning] = useState(false);
   const [sessions, setSessions] = useState(0);
   const [customWork, setCustomWork] = useState(25);
-  const [customBreak, setCustomBreak] = useState(5);   // max 10
-  const [customLong, setCustomLong] = useState(15);    // min 15
+  const [customBreak, setCustomBreak] = useState(5);
   const intervalRef = useRef(null);
 
   useEffect(() => {
@@ -53,7 +52,7 @@ export default function PomodoroPage() {
     setMode(newMode);
     const dur = newMode === 'work'
       ? customWork * 60
-      : newMode === 'short' ? customBreak * 60 : customLong * 60;
+      : newMode === 'short' ? customBreak * 60 : 15 * 60;
     setTimeLeft(dur);
   };
 
@@ -67,18 +66,6 @@ export default function PomodoroPage() {
     switchMode(mode);
   };
 
-  // Clamp short break: max 10
-  const handleShortBreakChange = (val) => {
-    const clamped = Math.min(10, Math.max(1, val));
-    setCustomBreak(clamped);
-  };
-
-  // Clamp long break: min 15
-  const handleLongBreakChange = (val) => {
-    const clamped = Math.max(15, Math.min(60, val));
-    setCustomLong(clamped);
-  };
-
   const applyCustom = () => {
     setRunning(false);
     switchMode(mode);
@@ -87,9 +74,7 @@ export default function PomodoroPage() {
   const mm = String(Math.floor(timeLeft / 60)).padStart(2, '0');
   const ss = String(timeLeft % 60).padStart(2, '0');
 
-  const total = mode === 'work'
-    ? customWork * 60
-    : mode === 'short' ? customBreak * 60 : customLong * 60;
+  const total = mode === 'work' ? customWork * 60 : mode === 'short' ? customBreak * 60 : 15 * 60;
   const progress = ((total - timeLeft) / total) * 100;
 
   return (
@@ -136,43 +121,8 @@ export default function PomodoroPage() {
       <div className="custom-settings">
         <h4>Custom Intervals (minutes)</h4>
         <div className="settings-row">
-
-          {/* Focus — no restriction */}
-          <label>
-            Focus (1–60):
-            <input
-              type="number" min="1" max="60"
-              value={customWork}
-              onChange={e => setCustomWork(Math.min(60, Math.max(1, +e.target.value)))}
-            />
-          </label>
-
-          {/* Short Break — max 10 */}
-          <label>
-            Short Break (1–10):
-            <input
-              type="number" min="1" max="10"
-              value={customBreak}
-              onChange={e => handleShortBreakChange(+e.target.value)}
-            />
-            {customBreak >= 10 && (
-              <span className="limit-warning">⚠️ Max 10 min</span>
-            )}
-          </label>
-
-          {/* Long Break — min 15 */}
-          <label>
-            Long Break (15–60):
-            <input
-              type="number" min="15" max="60"
-              value={customLong}
-              onChange={e => handleLongBreakChange(+e.target.value)}
-            />
-            {customLong <= 15 && (
-              <span className="limit-warning">⚠️ Min 15 min</span>
-            )}
-          </label>
-
+          <label>Focus: <input type="number" min="1" max="60" value={customWork} onChange={e => setCustomWork(+e.target.value)} /></label>
+          <label>Short Break: <input type="number" min="1" max="30" value={customBreak} onChange={e => setCustomBreak(+e.target.value)} /></label>
           <button className="btn-primary" onClick={applyCustom}>Apply</button>
         </div>
       </div>
