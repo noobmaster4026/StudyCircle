@@ -31,7 +31,12 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }]
+    courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
+        reminderPreferences: {
+        emailReminders:  { type: Boolean, default: true },
+        inAppReminders:  { type: Boolean, default: true },
+        reminderTimes:   { type: [Number], default: [60] }
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model("UserData", userSchema);

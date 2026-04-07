@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 
-const API = 'http://localhost:5000/api/documents';
+const API = 'http://localhost:3001/api/documents';
 
 export default function ScannerPage() {
   const [documents, setDocuments]   = useState([]);

@@ -13,6 +13,8 @@ import VideoRoomPage from "./pages/VideoRoomPage";
 import NotesPage from "./pages/NotesPage";
 import MyCoursesPage from "./pages/MyCoursesPage";
 import "./App.css";
+import ScannerPage from "./pages/ScannerPage";
+import SharedDocPage from "./pages/SharedDocPage";
 
 const meetSocket = io("http://localhost:5000", {
   autoConnect: false,
@@ -36,6 +38,8 @@ function App() {
         <Route path="/video-rooms" element={<JoinRoomPage />} />
         <Route path="/study-rooms" element={<JoinRoomPage />} />
         <Route path="/room/:id" element={<VideoRoomPage socket={meetSocket} />} />
+        <Route path="/scanner" element={<ScannerPage />} />
+        <Route path="/share/:token" element={<SharedDocPage />} />
       </Routes>
     </BrowserRouter>
   );

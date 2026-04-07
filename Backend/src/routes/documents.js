@@ -45,7 +45,7 @@ router.post('/scan', upload.single('file'), async (req, res) => {
     const extractedText = ocrResult.data.text.trim() ||
       'No text could be extracted. Make sure the image contains clear, readable text.';
 
-    const fileUrl    = `http://localhost:5000/uploads/${req.file.filename}`;
+    const fileUrl    = `http://localhost:3001/uploads/${req.file.filename}`;
     const shareToken = uuidv4();
 
     const doc = new Document({

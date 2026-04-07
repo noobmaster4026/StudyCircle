@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import GoalsDrawer from "../GoalsDrawer";
 import styles from "./StudentDashboard.module.css";
+import ReminderPreferencesPanel from "../ReminderPreferencesPanel";
 
 function StudentDashboard() {
   const userName = localStorage.getItem("userName") || "Student";
   const navigate  = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const cardsRef = useRef([]);
+  const [showReminderPrefs, setShowReminderPrefs] = useState(false);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -100,6 +102,14 @@ function StudentDashboard() {
       action: () => setDrawerOpen(true),
       btnText: "View Progress",
     },
+    {
+      num: "07. SCANNER",
+      title: "Scan Documents",
+      desc: "Upload images and extract text using OCR. Share scanned documents with a link.",
+      img: "https://images.unsplash.com/photo-1568667256549-094345857637?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/scanner"),
+      btnText: "Open Scanner",
+    },
   ];
 
   return (
@@ -114,6 +124,18 @@ function StudentDashboard() {
         <div className={styles.navRight}>
           <span className={styles.roleTag}>🎓 Student</span>
           <button className={styles.logoutBtn} onClick={handleLogout}>Logout</button>
+          <button 
+              className={styles.logoutBtn} 
+              onClick={() => setShowReminderPrefs(v => !v)}
+              style={{ marginRight: 8 }}
+            >
+              🔔
+          </button>
+          {showReminderPrefs && (
+              <div style={{ position: 'fixed', top: 70, right: 20, zIndex: 999, width: 280, borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
+                <ReminderPreferencesPanel onClose={() => setShowReminderPrefs(false)} />
+              </div>
+            )}
         </div>
       </nav>
 

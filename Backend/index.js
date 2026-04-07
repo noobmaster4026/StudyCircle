@@ -8,20 +8,25 @@ const bcrypt = require('bcryptjs');
 const Goal = require('./src/models/goal');
 const Flashcard = require('./src/models/Flashcard');
 //const quizRoutes = require("./src/routes/quizRoutes");
+const documentRoutes = require('./src/routes/documents');
 
-// 1. Import the teammate's course routes
 const courseRoutes = require("./src/routes/courseRoutes"); 
+const notificationRoutes = require('./src/routes/notificationRoutes');
+const startReminderService = require('./src/utils/reminderService');
 
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 
 // Connect to Database
-connectDB();
+connectDB().then(() => startReminderService());
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/api/documents', documentRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/notifications', notificationRoutes);
 
 // 2. Route Registration
 app.use("/api", routes);
@@ -243,6 +248,32 @@ app.post("/api/ind-infos/:userId/courses", async (req, res) => {
 app.get("/api/ind-infos/:userId", async (req, res) => {
     try {
         const user = await User.findById(req.params.userId).populate('courses');
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// 3. Add a GET route to fetch user preferences + a PUT route to update them
+// (ReminderPreferencesPanel calls these two endpoints)
+
+app.get("/api/users/:id", async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id, "-password");
+        if (!user) return res.status(404).json({ message: "User not found" });
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.put("/api/users/:id/preferences", async (req, res) => {
+    try {
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { reminderPreferences: req.body },
+            { new: true }
+        );
         res.status(200).json(user);
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-"scripts": {
-  "test": "echo \"Error: no test specified\" && exit 1",
-  "dev": "concurrently \"npm run backend\" \"npm run meeting\" \"npm run frontend\"",
-  "backend": "cd Backend && npm run dev",
-  "meeting": "cd MeetingServer && node index.js",
-  "frontend": "cd Login_Auth_FE && npm run dev"
-},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run backend\" \"npm run meeting\" \"npm run frontend\"",
+    "backend": "cd Backend && npm run dev",
+    "meeting": "cd MeetingServer && node index.js",
+    "frontend": "cd Login_Auth_FE && npm run dev"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -22,8 +22,11 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.3",
+    "multer": "^2.1.1",
     "nodemon": "^3.1.14",
-    "react-router-dom": "^7.13.1"
+    "react-router-dom": "^7.13.1",
+    "tesseract.js": "^7.0.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
