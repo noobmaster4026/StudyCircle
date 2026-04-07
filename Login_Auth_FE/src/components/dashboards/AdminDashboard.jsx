@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./AdminDashboard.module.css";
 
+const COURSES_API = "http://localhost:3001/api/courses";
+
 function AdminDashboard() {
   const userName = localStorage.getItem("userName") || "Admin";
   const navigate = useNavigate();
@@ -9,6 +11,15 @@ function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [filter, setFilter] = useState("all");
   const [showUsersPanel, setShowUsersPanel] = useState(false);
+
+  // Course launch state
+  const [showCourseModal, setShowCourseModal] = useState(false);
+  const [courses, setCourses] = useState([]);
+  const [courseForm, setCourseForm] = useState({ name: "", code: "", seatCapacity: "" });
+  const [courseError, setCourseError] = useState("");
+  const [courseSuccess, setCourseSuccess] = useState("");
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [courseLoading, setCourseLoading] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -55,6 +66,84 @@ function AdminDashboard() {
     const res = await fetch("http://localhost:3001/api/admin/users");
     const data = await res.json();
     setUsers(data);
+  };
+
+  const fetchCourses = async () => {
+    try {
+      const res = await fetch(COURSES_API);
+      const data = await res.json();
+      if (res.ok) setCourses(data);
+    } catch {
+      setCourseError("Failed to load courses.");
+    }
+  };
+
+  const handleOpenCourseModal = () => {
+    setCourseForm({ name: "", code: "", seatCapacity: "" });
+    setCourseError("");
+    setCourseSuccess("");
+    setEditingCourse(null);
+    fetchCourses();
+    setShowCourseModal(true);
+  };
+
+  const handleCourseFormChange = (e) => {
+    setCourseForm({ ...courseForm, [e.target.name]: e.target.value });
+    setCourseError("");
+    setCourseSuccess("");
+  };
+
+  const handleCreateOrUpdate = async () => {
+    const { name, code, seatCapacity } = courseForm;
+    if (!name.trim() || !code.trim()) {
+      setCourseError("Course name and code are required.");
+      return;
+    }
+    setCourseLoading(true);
+    setCourseError("");
+    setCourseSuccess("");
+    try {
+      const url = editingCourse ? `${COURSES_API}/${editingCourse._id}` : COURSES_API;
+      const method = editingCourse ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, code, seatCapacity }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCourseError(data.message || "Something went wrong.");
+      } else {
+        setCourseSuccess(editingCourse ? "Course updated!" : "Course launched successfully!");
+        setCourseForm({ name: "", code: "", seatCapacity: "" });
+        setEditingCourse(null);
+        fetchCourses();
+      }
+    } catch {
+      setCourseError("Network error.");
+    }
+    setCourseLoading(false);
+  };
+
+  const handleEditCourse = (course) => {
+    setEditingCourse(course);
+    setCourseForm({
+      name: course.name,
+      code: course.code,
+      seatCapacity: course.seatCapacity ?? "",
+    });
+    setCourseError("");
+    setCourseSuccess("");
+  };
+
+  const handleDeleteCourse = async (id) => {
+    if (!window.confirm("Delete this course? Students will lose access.")) return;
+    try {
+      const res = await fetch(`${COURSES_API}/${id}`, { method: "DELETE" });
+      if (res.ok) fetchCourses();
+    } catch {
+      setCourseError("Failed to delete course.");
+    }
   };
 
   const handleBan = async (id, isBanned) => {
@@ -116,7 +205,15 @@ function AdminDashboard() {
       btnText: "View Courses"
     },
     {
-      num: "05. MODERATION",
+      num: "05. LAUNCH",
+      title: "Launch a Course",
+      desc: "Create new courses for the platform. Students will be able to enroll immediately after launch.",
+      img: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2670&auto=format&fit=crop",
+      action: handleOpenCourseModal,
+      btnText: "Launch Course"
+    },
+    {
+      num: "06. MODERATION",
       title: "Ban / Delete Users",
       desc: "Enforce platform rules. Ban or remove users who violate community guidelines.",
       img: "https://images.unsplash.com/photo-1614850523060-8da1d56ae167?q=80&w=2670&auto=format&fit=crop",
@@ -131,9 +228,9 @@ function AdminDashboard() {
       {/* Navbar */}
       <nav className={styles.navbar}>
         <div className={styles.logoWrapper}>
-                  <img src="/Icon.png" alt="logo" className={styles.logoImg}/>
-                  <h1 className={styles.logo}>StudyCircle</h1>
-                  </div>
+          <img src="/Icon.png" alt="logo" className={styles.logoImg} />
+          <h1 className={styles.logo}>StudyCircle</h1>
+        </div>
         <div className={styles.navRight}>
           <span className={styles.roleTag}>🛡️ Admin</span>
           <button className={styles.logoutBtn} onClick={handleLogout}>Logout</button>
@@ -228,6 +325,110 @@ function AdminDashboard() {
               )}
             </div>
             <button className={styles.closeBtn} onClick={() => setShowUsersPanel(false)}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Course Launch Modal */}
+      {showCourseModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowCourseModal(false)}>
+          <div className={`${styles.modal} ${styles.courseModal}`} onClick={e => e.stopPropagation()}>
+            <h3>🚀 {editingCourse ? "Edit Course" : "Launch a New Course"}</h3>
+
+            {/* Form */}
+            <div className={styles.courseForm}>
+              <input
+                className={styles.courseInput}
+                type="text"
+                name="name"
+                placeholder="Course Name (e.g. Introduction to AI)"
+                value={courseForm.name}
+                onChange={handleCourseFormChange}
+              />
+              <input
+                className={styles.courseInput}
+                type="text"
+                name="code"
+                placeholder="Course Code (e.g. CS101)"
+                value={courseForm.code}
+                onChange={handleCourseFormChange}
+              />
+              <input
+                className={styles.courseInput}
+                type="number"
+                name="seatCapacity"
+                placeholder="Seat Capacity (optional, 0 = unlimited)"
+                value={courseForm.seatCapacity}
+                onChange={handleCourseFormChange}
+                min="0"
+              />
+
+              {courseError && <p className={styles.courseError}>{courseError}</p>}
+              {courseSuccess && <p className={styles.courseSuccess}>{courseSuccess}</p>}
+
+              <div className={styles.courseFormBtns}>
+                <button
+                  className={styles.launchBtn}
+                  onClick={handleCreateOrUpdate}
+                  disabled={courseLoading}
+                >
+                  {courseLoading ? "Saving..." : editingCourse ? "Update Course" : "🚀 Launch Course"}
+                </button>
+                {editingCourse && (
+                  <button
+                    className={styles.cancelEditBtn}
+                    onClick={() => {
+                      setEditingCourse(null);
+                      setCourseForm({ name: "", code: "", seatCapacity: "" });
+                      setCourseError("");
+                      setCourseSuccess("");
+                    }}
+                  >
+                    Cancel Edit
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Existing Courses List */}
+            <div className={styles.courseListSection}>
+              <h4>Existing Courses ({courses.length})</h4>
+              {courses.length === 0 ? (
+                <p className={styles.emptyMsg}>No courses yet.</p>
+              ) : (
+                <div className={styles.courseItems}>
+                  {courses.map(course => (
+                    <div key={course._id} className={styles.courseItem}>
+                      <div className={styles.courseItemInfo}>
+                        <span className={styles.courseItemCode}>{course.code}</span>
+                        <span className={styles.courseItemName}>{course.name}</span>
+                        <span className={styles.courseItemSeats}>
+                          {course.seatCapacity > 0 ? `${course.seatCapacity} seats` : "Unlimited"}
+                        </span>
+                      </div>
+                      <div className={styles.courseItemActions}>
+                        <button
+                          className={styles.editCourseBtn}
+                          onClick={() => handleEditCourse(course)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className={styles.deleteCourseBtn}
+                          onClick={() => handleDeleteCourse(course._id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button className={styles.closeBtn} onClick={() => setShowCourseModal(false)}>
               Close
             </button>
           </div>

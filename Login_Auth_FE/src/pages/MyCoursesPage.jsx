@@ -2,8 +2,8 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./MyCoursesPage.module.css";
 
-const COURSES_API  = "http://localhost:5001/api/courses";
-const IND_INFO_API = "http://localhost:5001/api/ind-infos";
+const COURSES_API  = "http://localhost:3001/api/courses";
+const IND_INFO_API = "http://localhost:3001/api/ind-infos";
 const MAX_COURSES  = 4;
 
 const MyCoursesPage = () => {

@@ -7,15 +7,30 @@ const User = require('./src/models/user');
 const bcrypt = require('bcryptjs');
 const Goal = require('./src/models/goal');
 const Flashcard = require('./src/models/Flashcard');
+//const quizRoutes = require("./src/routes/quizRoutes");
+
+// 1. Import the teammate's course routes
+const courseRoutes = require("./src/routes/courseRoutes"); 
+
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 
+// Connect to Database
 connectDB();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
+
+// 2. Route Registration
 app.use("/api", routes);
+//app.use("/api/quiz", quizRoutes);
+
+// Register the course routes so the Frontend can reach /api/courses
+app.use("/api/courses", courseRoutes); 
+
+// --- Auth & Admin Routes ---
 
 // Login
 app.post("/api/login", async (req, res) => {
@@ -87,6 +102,8 @@ app.delete("/api/admin/users/:id", async (req, res) => {
     }
 });
 
+// --- User Roles & Goals ---
+
 // Get all teachers
 app.get("/api/teachers", async (req, res) => {
     try {
@@ -148,13 +165,15 @@ app.delete("/api/goals/:id", async (req, res) => {
     }
 });
 
-//Get the Flashcards
-app.get("/api/flashcards",async(req,res)=>{
-    try{
-        const cards= await Flashcard.find().sort({createdAt: -1});
+// --- Flashcards ---
+
+// Get the Flashcards
+app.get("/api/flashcards", async (req, res) => {
+    try {
+        const cards = await Flashcard.find().sort({ createdAt: -1 });
         res.json(cards);
-    }catch(err){
-        res.status(500).json({message: err.message});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 })
 
@@ -203,6 +222,34 @@ app.delete("/api/flashcards/:id", async (req, res) => {
     }
 });
 
+// Add a course to student's profile
+app.post("/api/ind-infos/:userId/courses", async (req, res) => {
+    try {
+        const { courseId } = req.body;
+        // This assumes you have a field in your User model called 'courses' (an Array)
+        const user = await User.findByIdAndUpdate(
+            req.params.userId,
+            { $addToSet: { courses: courseId } }, // $addToSet prevents duplicates
+            { new: true }
+        ).populate('courses'); // Populate to send back full course objects
+        
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Get student's enrolled courses
+app.get("/api/ind-infos/:userId", async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId).populate('courses');
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Start Server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
