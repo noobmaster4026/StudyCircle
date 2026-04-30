@@ -249,3 +249,9 @@
   font-weight: 600;
   text-align: center;
 }
+.errorBanner {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #ff6b6b;
+  font-weight: 600;
+}

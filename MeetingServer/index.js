@@ -28,6 +28,10 @@ const io = new Server(server, {
   cors: { origin: "*", methods: ["GET", "POST"] },
 });
 
+// ✅ FIX: attach AFTER io is defined
+const { attachWhiteboardNamespace } = require('./whiteboard/whiteboardNamespace');
+attachWhiteboardNamespace(io);
+
 io.on("connection", (socket) => {
   console.log(`🔌 Connected: ${socket.id}`);
 
@@ -52,7 +56,7 @@ io.on("connection", (socket) => {
     });
   });
 
-  // Whiteboard
+  // In-meeting whiteboard (existing video room feature — keep as-is)
   socket.on("draw", ({ roomId, data }) => {
     socket.to(roomId).emit("draw", data);
   });
@@ -98,4 +102,4 @@ io.on("connection", (socket) => {
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () =>
   console.log(`🚀 Meeting server running on http://localhost:${PORT}`)
-); 
+);

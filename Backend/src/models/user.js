@@ -39,4 +39,5 @@ const userSchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-module.exports = mongoose.model("UserData", userSchema);
+// ✅ This checks if the model is already compiled before creating it
+module.exports = mongoose.models.UserData || mongoose.model("UserData", userSchema);

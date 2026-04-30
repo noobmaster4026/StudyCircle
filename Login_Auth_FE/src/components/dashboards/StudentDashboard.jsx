@@ -7,8 +7,8 @@ import ReminderPreferencesPanel from "../ReminderPreferencesPanel";
 function StudentDashboard() {
   const userName = localStorage.getItem("userName") || "Student";
   const navigate  = useNavigate();
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const cardsRef = useRef([]);
+  const [drawerOpen, setDrawerOpen]           = useState(false);
+  const cardsRef                              = useRef([]);
   const [showReminderPrefs, setShowReminderPrefs] = useState(false);
 
   const handleLogout = () => {
@@ -110,6 +110,33 @@ function StudentDashboard() {
       action: () => navigate("/scanner"),
       btnText: "Open Scanner",
     },
+    {
+      num: "08. STUDY GROUPS",
+      title: "Find Your Group",
+      desc: "Get auto-matched into study groups based on your courses, schedule, and study style. Collaborate with peers who study the way you do.",
+      img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2671&auto=format&fit=crop",
+      action: () => navigate("/study-groups"),
+      btnText: "Explore Groups",
+    },
+    {
+      num: "09. WHITEBOARD",
+      title: "Think Visually",
+      // ✅ Independent from study groups — every student can access the class-wide board
+      // directly. No group membership required. Study groups also get their own boards
+      // via /whiteboard/<group-room-id>, but this card always opens the shared class board.
+      desc: "Draw, annotate, and brainstorm with any classmate in real time. Open to every student — see a live history log of who changed what, with full undo support.",
+      img: "https://images.unsplash.com/photo-1507209575474-fa818c2f4e46?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/whiteboard/shared-board"),
+      btnText: "Open Whiteboard",
+    },
+    {
+      num: "10. AI QUIZ",
+      title: "Test Yourself",
+      desc: "Generate custom quizzes on any topic using AI. Pick your difficulty, question count, and type — get instant feedback with detailed explanations after every answer.",
+      img: "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/quizzes"),
+      btnText: "Generate Quiz",
+    },
   ];
 
   return (
@@ -124,18 +151,18 @@ function StudentDashboard() {
         <div className={styles.navRight}>
           <span className={styles.roleTag}>🎓 Student</span>
           <button className={styles.logoutBtn} onClick={handleLogout}>Logout</button>
-          <button 
-              className={styles.logoutBtn} 
-              onClick={() => setShowReminderPrefs(v => !v)}
-              style={{ marginRight: 8 }}
-            >
-              🔔
+          <button
+            className={styles.logoutBtn}
+            onClick={() => setShowReminderPrefs(v => !v)}
+            style={{ marginRight: 8 }}
+          >
+            🔔
           </button>
           {showReminderPrefs && (
-              <div style={{ position: 'fixed', top: 70, right: 20, zIndex: 999, width: 280, borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
-                <ReminderPreferencesPanel onClose={() => setShowReminderPrefs(false)} />
-              </div>
-            )}
+            <div style={{ position: 'fixed', top: 70, right: 20, zIndex: 999, width: 280, borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
+              <ReminderPreferencesPanel onClose={() => setShowReminderPrefs(false)} />
+            </div>
+          )}
         </div>
       </nav>
 

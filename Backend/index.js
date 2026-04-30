@@ -7,16 +7,18 @@ const User = require('./src/models/user');
 const bcrypt = require('bcryptjs');
 const Goal = require('./src/models/goal');
 const Flashcard = require('./src/models/Flashcard');
-//const quizRoutes = require("./src/routes/quizRoutes");
 const documentRoutes = require('./src/routes/documents');
-
-const courseRoutes = require("./src/routes/courseRoutes"); 
+const courseRoutes = require("./src/routes/courseRoutes");
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const startReminderService = require('./src/utils/reminderService');
 
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
+const quizRoutes = require('./src/routes/quizRoutes');
+
+// ✅ FIX: was './routes/studyGroupRoutes' — missing src/ prefix
+const studyGroupRoutes = require('./src/routes/studyGroupRoutes');
 
 // Connect to Database
 connectDB().then(() => startReminderService());
@@ -28,28 +30,22 @@ app.use('/api/documents', documentRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/notifications', notificationRoutes);
 
-// 2. Route Registration
+// Route Registration
 app.use("/api", routes);
-//app.use("/api/quiz", quizRoutes);
-
-// Register the course routes so the Frontend can reach /api/courses
-app.use("/api/courses", courseRoutes); 
+app.use('/api/quiz', quizRoutes);
+app.use("/api/courses", courseRoutes);
+app.use('/api/study-groups', studyGroupRoutes);
 
 // --- Auth & Admin Routes ---
 
-// Login
 app.post("/api/login", async (req, res) => {
     try {
         const { email, password } = req.body;
-
         const user = await User.findOne({ email });
         if (!user) return res.status(400).json({ message: "Email not found" });
-
         if (user.isBanned) return res.status(403).json({ message: "Your account has been banned" });
-
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: "Incorrect password" });
-
         res.status(200).json({
             message: "Login successful!",
             name: user.name,
@@ -61,7 +57,6 @@ app.post("/api/login", async (req, res) => {
     }
 });
 
-// Get all users (admin only)
 app.get("/api/admin/users", async (req, res) => {
     try {
         const users = await User.find({}, "-password");
@@ -71,15 +66,12 @@ app.get("/api/admin/users", async (req, res) => {
     }
 });
 
-// Ban user (admin only)
 app.put("/api/admin/ban/:id", async (req, res) => {
     try {
         const targetUser = await User.findById(req.params.id);
-        
         if (targetUser.role === "admin") {
             return res.status(403).json({ message: "Admins cannot ban other admins" });
         }
-
         const user = await User.findByIdAndUpdate(
             req.params.id,
             { isBanned: req.body.isBanned },
@@ -91,15 +83,12 @@ app.put("/api/admin/ban/:id", async (req, res) => {
     }
 });
 
-// Delete user (admin only)
 app.delete("/api/admin/users/:id", async (req, res) => {
     try {
         const targetUser = await User.findById(req.params.id);
-
         if (targetUser.role === "admin") {
             return res.status(403).json({ message: "Admins cannot delete other admins" });
         }
-
         await User.findByIdAndDelete(req.params.id);
         res.status(200).json({ message: "User deleted" });
     } catch (error) {
@@ -107,9 +96,6 @@ app.delete("/api/admin/users/:id", async (req, res) => {
     }
 });
 
-// --- User Roles & Goals ---
-
-// Get all teachers
 app.get("/api/teachers", async (req, res) => {
     try {
         const teachers = await User.find({ role: "teacher" }, "-password");
@@ -119,7 +105,6 @@ app.get("/api/teachers", async (req, res) => {
     }
 });
 
-// Get all students
 app.get("/api/students", async (req, res) => {
     try {
         const students = await User.find({ role: "student" }, "-password");
@@ -129,7 +114,6 @@ app.get("/api/students", async (req, res) => {
     }
 });
 
-// Get all goals for a user
 app.get("/api/goals/:userId", async (req, res) => {
     try {
         const goals = await Goal.find({ userId: req.params.userId });
@@ -139,7 +123,6 @@ app.get("/api/goals/:userId", async (req, res) => {
     }
 });
 
-// Add a goal
 app.post("/api/goals", async (req, res) => {
     try {
         const goal = new Goal(req.body);
@@ -150,7 +133,6 @@ app.post("/api/goals", async (req, res) => {
     }
 });
 
-// Update a goal
 app.put("/api/goals/:id", async (req, res) => {
     try {
         const goal = await Goal.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -160,7 +142,6 @@ app.put("/api/goals/:id", async (req, res) => {
     }
 });
 
-// Delete a goal
 app.delete("/api/goals/:id", async (req, res) => {
     try {
         await Goal.findByIdAndDelete(req.params.id);
@@ -170,9 +151,6 @@ app.delete("/api/goals/:id", async (req, res) => {
     }
 });
 
-// --- Flashcards ---
-
-// Get the Flashcards
 app.get("/api/flashcards", async (req, res) => {
     try {
         const cards = await Flashcard.find().sort({ createdAt: -1 });
@@ -180,9 +158,8 @@ app.get("/api/flashcards", async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
-})
+});
 
-// Get cards by deck
 app.get("/api/flashcards/deck/:deck", async (req, res) => {
     try {
         const cards = await Flashcard.find({ deck: req.params.deck });
@@ -192,7 +169,6 @@ app.get("/api/flashcards/deck/:deck", async (req, res) => {
     }
 });
 
-// Create flashcard
 app.post("/api/flashcards", async (req, res) => {
     const card = new Flashcard({
         deck: req.body.deck,
@@ -207,7 +183,6 @@ app.post("/api/flashcards", async (req, res) => {
     }
 });
 
-// Update flashcard
 app.put("/api/flashcards/:id", async (req, res) => {
     try {
         const updated = await Flashcard.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -217,7 +192,6 @@ app.put("/api/flashcards/:id", async (req, res) => {
     }
 });
 
-// Delete flashcard
 app.delete("/api/flashcards/:id", async (req, res) => {
     try {
         await Flashcard.findByIdAndDelete(req.params.id);
@@ -227,24 +201,20 @@ app.delete("/api/flashcards/:id", async (req, res) => {
     }
 });
 
-// Add a course to student's profile
 app.post("/api/ind-infos/:userId/courses", async (req, res) => {
     try {
         const { courseId } = req.body;
-        // This assumes you have a field in your User model called 'courses' (an Array)
         const user = await User.findByIdAndUpdate(
             req.params.userId,
-            { $addToSet: { courses: courseId } }, // $addToSet prevents duplicates
+            { $addToSet: { courses: courseId } },
             { new: true }
-        ).populate('courses'); // Populate to send back full course objects
-        
+        ).populate('courses');
         res.status(200).json(user);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
 
-// Get student's enrolled courses
 app.get("/api/ind-infos/:userId", async (req, res) => {
     try {
         const user = await User.findById(req.params.userId).populate('courses');
@@ -253,9 +223,6 @@ app.get("/api/ind-infos/:userId", async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-
-// 3. Add a GET route to fetch user preferences + a PUT route to update them
-// (ReminderPreferencesPanel calls these two endpoints)
 
 app.get("/api/users/:id", async (req, res) => {
     try {
@@ -280,7 +247,6 @@ app.put("/api/users/:id/preferences", async (req, res) => {
     }
 });
 
-// Start Server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

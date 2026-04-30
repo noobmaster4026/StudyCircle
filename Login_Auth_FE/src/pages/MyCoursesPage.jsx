@@ -2,9 +2,9 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./MyCoursesPage.module.css";
 
-const COURSES_API  = "http://localhost:3001/api/courses";
-const IND_INFO_API = "http://localhost:3001/api/ind-infos";
-const MAX_COURSES  = 4;
+const COURSES_API = "http://localhost:3001/api/courses";
+const USERS_API   = "http://localhost:3001/api/users";
+const MAX_COURSES = 4;
 
 const MyCoursesPage = () => {
   const navigate = useNavigate();
@@ -14,29 +14,36 @@ const MyCoursesPage = () => {
   const [loading,     setLoading]     = useState(true);
   const [updatingId,  setUpdatingId]  = useState(null);
   const [search,      setSearch]      = useState("");
+  const [error,       setError]       = useState("");
 
   const user = useMemo(() => {
     try { return JSON.parse(localStorage.getItem("user") || "null"); }
     catch { return null; }
   }, []);
 
+  // Load all available courses
   useEffect(() => {
     const load = async () => {
       try {
         const res  = await fetch(COURSES_API);
         const data = await res.json();
         if (res.ok) setAllCourses(data);
-      } catch {}
-      finally { setLoading(false); }
+        else setError("Failed to load courses.");
+      } catch {
+        setError("Could not reach the server.");
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, []);
 
+  // Load this student's enrolled course IDs
   useEffect(() => {
     if (!user?.id) return;
     const load = async () => {
       try {
-        const res  = await fetch(IND_INFO_API + "/" + user.id);
+        const res  = await fetch(`${USERS_API}/${user.id}/courses`);
         const data = await res.json();
         if (res.ok) {
           setSelectedIds((data.courses || []).map((c) =>
@@ -61,8 +68,9 @@ const MyCoursesPage = () => {
   const handleAdd = async (courseId) => {
     if (selectedIds.length >= MAX_COURSES || !user?.id) return;
     setUpdatingId(courseId);
+    setError("");
     try {
-      const res  = await fetch(IND_INFO_API + "/" + user.id + "/courses", {
+      const res  = await fetch(`${USERS_API}/${user.id}/courses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ courseId }),
@@ -72,16 +80,22 @@ const MyCoursesPage = () => {
         setSelectedIds((data.courses || []).map((c) =>
           typeof c === "string" ? c : c._id
         ));
+      } else {
+        setError(data.message || "Failed to add course.");
       }
-    } catch {}
-    finally { setUpdatingId(null); }
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   const handleDrop = async (courseId) => {
     if (!user?.id) return;
     setUpdatingId(courseId);
+    setError("");
     try {
-      const res  = await fetch(IND_INFO_API + "/" + user.id + "/courses/" + courseId, {
+      const res  = await fetch(`${USERS_API}/${user.id}/courses/${courseId}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -89,9 +103,14 @@ const MyCoursesPage = () => {
         setSelectedIds((data.courses || []).map((c) =>
           typeof c === "string" ? c : c._id
         ));
+      } else {
+        setError(data.message || "Failed to drop course.");
       }
-    } catch {}
-    finally { setUpdatingId(null); }
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   const isFull = selectedIds.length >= MAX_COURSES;
@@ -104,10 +123,12 @@ const MyCoursesPage = () => {
         </button>
         <h2>My Courses</h2>
         <p>Add and manage your enrolled courses. You can select up to {MAX_COURSES} courses.</p>
+        {error && <p className={styles.errorBanner}>{error}</p>}
       </div>
 
       <div className={styles.content}>
 
+        {/* Enrolled courses */}
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
             <h3>Enrolled Courses</h3>
@@ -161,6 +182,7 @@ const MyCoursesPage = () => {
           )}
         </div>
 
+        {/* Add a course */}
         {!isFull && (
           <div className={styles.section}>
             <div className={styles.sectionHeader}>

@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import Register from "./components/auth/Register";
 import Login from "./components/auth/Login";
@@ -15,6 +15,9 @@ import MyCoursesPage from "./pages/MyCoursesPage";
 import "./App.css";
 import ScannerPage from "./pages/ScannerPage";
 import SharedDocPage from "./pages/SharedDocPage";
+import QuizzesPage from './pages/QuizzesPage';
+import StudyGroups from './pages/StudyGroupsPage';
+import SharedWhiteboard from './components/whiteboard/SharedWhiteboard';
 
 const meetSocket = io("http://localhost:5000", {
   autoConnect: false,
@@ -40,6 +43,10 @@ function App() {
         <Route path="/room/:id" element={<VideoRoomPage socket={meetSocket} />} />
         <Route path="/scanner" element={<ScannerPage />} />
         <Route path="/share/:token" element={<SharedDocPage />} />
+        <Route path="/quizzes" element={<QuizzesPage />} />
+        <Route path="/study-groups" element={<StudyGroups />} />
+        <Route path="/whiteboard" element={<Navigate to="/whiteboard/shared-board" replace />} />
+        <Route path="/whiteboard/:roomId" element={<SharedWhiteboard />} />
       </Routes>
     </BrowserRouter>
   );
