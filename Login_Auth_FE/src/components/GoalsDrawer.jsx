@@ -95,7 +95,7 @@ function GoalsDrawer({ isOpen, onClose }) {
             onChange={(e) => setTitle(e.target.value)}
           />
           <input
-            type="date"
+            type="datetime-local"
             className={styles.input}
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
@@ -120,7 +120,7 @@ function GoalsDrawer({ isOpen, onClose }) {
                 <div>
                   <p className={styles.goalTitle}>{goal.title}</p>
                   <p className={styles.goalDeadline}>
-                    📅 {new Date(goal.deadline).toLocaleDateString()}
+                    📅 {new Date(goal.deadline).toLocaleDateString()} ⏰ {new Date(goal.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>

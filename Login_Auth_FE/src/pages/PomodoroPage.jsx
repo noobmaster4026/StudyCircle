@@ -39,6 +39,17 @@ export default function PomodoroPage() {
 
   const handleComplete = () => {
     new Audio('https://www.soundjay.com/buttons/sounds/button-09a.mp3').play().catch(() => {});
+    
+    // Browser Notification (FR-45)
+    if (Notification.permission === "granted") {
+      new Notification("Pomodoro Update", {
+        body: mode === 'work' ? "Focus session complete! Take a break." : "Break complete! Back to work.",
+        icon: "/vite.svg"
+      });
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission();
+    }
+
     if (mode === 'work') {
       setSessions(s => {
         const newS = s + 1;
@@ -95,10 +106,18 @@ export default function PomodoroPage() {
       {/* ✅ Particle Background */}
       <ParticleBackground />
 
-      {/* ✅ Content on top */}
-      <div style={contentStyle}>
+        <div style={contentStyle}>
         <div className="page pomodoro-page">
           <h2>⏱️ Pomodoro Timer</h2>
+          
+          {/* Notification Permission Prompt (FR-45) */}
+          {Notification.permission !== "granted" && (
+            <div style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', padding: '10px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+               <span style={{ fontSize: '13px', color: '#a5b4fc' }}>🔔 Enable browser alerts for breaks?</span>
+               <button onClick={() => Notification.requestPermission()} style={{ padding: '4px 12px', background: '#6366f1', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer', fontSize: '12px' }}>Enable</button>
+            </div>
+          )}
+
           <p className="sessions-count">Sessions completed: <strong>{sessions}</strong></p>
 
           <div className="mode-tabs">

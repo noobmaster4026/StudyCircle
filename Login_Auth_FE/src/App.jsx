@@ -8,6 +8,7 @@ import TeacherDashboard from "./components/dashboards/TeacherDashboard";
 import AdminDashboard from "./components/dashboards/AdminDashboard";
 import FlashcardsPage from "./pages/FlashcardsPage";
 import PomodoroPage from "./pages/PomodoroPage";
+import NotesPage from "./pages/NotesPage";
 import JoinRoomPage from "./pages/JoinRoomPage";
 import VideoRoomPage from "./pages/VideoRoomPage";
 import NotesPage from "./pages/NotesPage";
@@ -34,6 +35,7 @@ function App() {
         <Route path="/teacher" element={<TeacherDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/flashcards" element={<FlashcardsPage />} />
+        <Route path="/notes" element={<NotesPage />} />
         <Route path="/pomodoro" element={<PomodoroPage />} />
         <Route path="/notes" element={<NotesPage />} />
         <Route path="/my-courses" element={<MyCoursesPage />} />

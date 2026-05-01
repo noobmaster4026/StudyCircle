@@ -2,11 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./src/config/db');
 const path = require('path');
+const fs = require('fs');
 const routes = require('./src/routes/routes');
 const User = require('./src/models/user');
 const bcrypt = require('bcryptjs');
 const Goal = require('./src/models/goal');
 const Flashcard = require('./src/models/Flashcard');
+const multer = require('multer');
+const Note = require('./src/models/Note');
 const documentRoutes = require('./src/routes/documents');
 const courseRoutes = require("./src/routes/courseRoutes");
 const notificationRoutes = require('./src/routes/notificationRoutes');
@@ -196,6 +199,68 @@ app.delete("/api/flashcards/:id", async (req, res) => {
     try {
         await Flashcard.findByIdAndDelete(req.params.id);
         res.json({ message: "Card deleted" });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadDir),
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage });
+
+app.post('/api/notes', upload.single('file'), async (req, res) => {
+    try {
+        const { title, description, uploadedBy, course } = req.body;
+        if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
+        const newNote = new Note({
+            title,
+            description,
+            uploadedBy,
+            course,
+            fileUrl: `/uploads/${req.file.filename}`,
+            fileName: req.file.originalname,
+            fileType: req.file.mimetype,
+            size: req.file.size
+        });
+
+        await newNote.save();
+        res.status(201).json(newNote);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+app.get('/api/notes', async (req, res) => {
+    try {
+        const query = {};
+        if (req.query.course) query.course = req.query.course;
+
+        const notes = await Note.find(query).sort({ createdAt: -1 }).populate('uploadedBy', 'name');
+        res.json(notes);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+app.delete('/api/notes/:id', async (req, res) => {
+    try {
+        const note = await Note.findById(req.params.id);
+        if (!note) return res.status(404).json({ message: "Note not found" });
+
+        const filePath = path.join(__dirname, note.fileUrl);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+
+        await Note.findByIdAndDelete(req.params.id);
+        res.json({ message: "Note deleted" });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
