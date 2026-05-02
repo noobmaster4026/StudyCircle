@@ -1,0 +1,251 @@
+const express   = require('express');
+const router    = express.Router();
+const Analytics = require('../models/Analytics');
+
+// ── Helper: Get start of a date period ─────────────────────────────────────
+// Returns a Date object set to the beginning of the requested period
+const getPeriodStart = (period) => {
+  const now = new Date();
+  if (period === 'week') {
+    // Gets the most recent Monday as start of week
+    const day  = now.getDay();
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(now.setDate(diff));
+  }
+  if (period === 'month') {
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  }
+  if (period === 'year') {
+    return new Date(now.getFullYear(), 0, 1);
+  }
+  return new Date(0); // 'all' — returns everything
+};
+
+// ── GET /api/analytics/summary ──────────────────────────────────────────────
+// Returns all metrics needed for the dashboard in one request:
+// total hours, subject breakdown, goal rate, quiz trends, flashcard stats,
+// pomodoro heatmap, and streak count
+router.get('/summary', async (req, res) => {
+  try {
+    const { period = 'week' } = req.query;
+    const startDate = getPeriodStart(period);
+
+    // Fetches all sessions within the selected time period
+    const sessions = await Analytics.find({
+      date: { $gte: startDate }
+    }).sort({ date: 1 });
+
+    // ── Total minutes studied ───────────────────────────────────────────────
+    const totalMinutes = sessions.reduce((sum, s) => sum + s.minutesStudied, 0);
+
+    // ── Subject breakdown — minutes per subject ─────────────────────────────
+    // Used to render the pie chart
+    const subjectMap = {};
+    sessions.forEach(s => {
+      subjectMap[s.subject] = (subjectMap[s.subject] || 0) + s.minutesStudied;
+    });
+    const subjectBreakdown = Object.entries(subjectMap).map(([name, minutes]) => ({
+      name,
+      minutes,
+      hours: parseFloat((minutes / 60).toFixed(2))
+    }));
+
+    // ── Goal completion rate ────────────────────────────────────────────────
+    const totalDays     = sessions.length;
+    const goalsCompleted = sessions.filter(s => s.goalCompleted).length;
+    const goalRate       = totalDays > 0 ? Math.round((goalsCompleted / totalDays) * 100) : 0;
+
+    // ── Quiz performance — daily correct percentage trend ───────────────────
+    // Groups quiz results by date for the line chart
+    const quizByDate = {};
+    sessions.forEach(s => {
+      const dateKey = s.date.toISOString().split('T')[0];
+      if (!quizByDate[dateKey]) quizByDate[dateKey] = { total: 0, correct: 0 };
+      quizByDate[dateKey].total   += s.quizStats.total;
+      quizByDate[dateKey].correct += s.quizStats.correct;
+    });
+    const quizTrend = Object.entries(quizByDate).map(([date, stats]) => ({
+      date,
+      score: stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0
+    }));
+
+    // ── Flashcard retention rate ────────────────────────────────────────────
+    const totalCards   = sessions.reduce((sum, s) => sum + s.flashcardStats.total,   0);
+    const correctCards = sessions.reduce((sum, s) => sum + s.flashcardStats.correct, 0);
+    const flashcardRetention = totalCards > 0
+      ? Math.round((correctCards / totalCards) * 100)
+      : 0;
+
+    // ── Pomodoro heatmap — sessions per day ─────────────────────────────────
+    // Used to render the calendar-style heatmap
+    const pomodoroMap = {};
+    sessions.forEach(s => {
+      const dateKey = s.date.toISOString().split('T')[0];
+      pomodoroMap[dateKey] = (pomodoroMap[dateKey] || 0) + s.pomodoroCount;
+    });
+    const pomodoroHeatmap = Object.entries(pomodoroMap).map(([date, count]) => ({
+      date, count
+    }));
+
+    // ── Study streak — consecutive days with at least 1 session ────────────
+    const studyDates = [...new Set(
+      sessions.map(s => s.date.toISOString().split('T')[0])
+    )].sort();
+
+    let streak = 0;
+    const today = new Date().toISOString().split('T')[0];
+    let checkDate = new Date();
+
+    // Counts backwards from today while there are consecutive study days
+    while (true) {
+      const dateStr = checkDate.toISOString().split('T')[0];
+      if (studyDates.includes(dateStr)) {
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    // ── Hours per day — for the bar chart ──────────────────────────────────
+    const dailyMap = {};
+    sessions.forEach(s => {
+      const dateKey = s.date.toISOString().split('T')[0];
+      dailyMap[dateKey] = (dailyMap[dateKey] || 0) + s.minutesStudied;
+    });
+    const dailyHours = Object.entries(dailyMap).map(([date, minutes]) => ({
+      date,
+      hours: parseFloat((minutes / 60).toFixed(2))
+    }));
+
+    res.json({
+      totalMinutes,
+      totalHours:      parseFloat((totalMinutes / 60).toFixed(2)),
+      subjectBreakdown,
+      goalRate,
+      goalsCompleted,
+      totalDays,
+      quizTrend,
+      flashcardRetention,
+      totalCards,
+      correctCards,
+      pomodoroHeatmap,
+      streak,
+      dailyHours,
+      totalSessions: sessions.length
+    });
+
+  } catch (err) {
+    console.error('Summary error:', err.message);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ── GET /api/analytics ──────────────────────────────────────────────────────
+// Returns all raw session logs sorted by newest first
+router.get('/', async (req, res) => {
+  try {
+    const sessions = await Analytics.find().sort({ date: -1 });
+    res.json(sessions);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ── POST /api/analytics ─────────────────────────────────────────────────────
+// Logs a new study session — called manually or by the Pomodoro timer
+router.post('/', async (req, res) => {
+  try {
+    const {
+      date, subject, minutesStudied, sessionType,
+      flashcardStats, quizStats, goalCompleted, pomodoroCount
+    } = req.body;
+
+    // Validates required fields before saving
+    if (!subject || !minutesStudied) {
+      return res.status(400).json({ message: 'Subject and minutesStudied are required' });
+    }
+
+    const session = new Analytics({
+      date:           date ? new Date(date) : new Date(),
+      subject,
+      minutesStudied,
+      sessionType:    sessionType    || 'manual',
+      flashcardStats: flashcardStats || { total: 0, correct: 0 },
+      quizStats:      quizStats      || { total: 0, correct: 0 },
+      goalCompleted:  goalCompleted  || false,
+      pomodoroCount:  pomodoroCount  || 0
+    });
+
+    await session.save();
+    res.status(201).json(session);
+  } catch (err) {
+    console.error('POST analytics error:', err.message);
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// ── DELETE /api/analytics/:id ───────────────────────────────────────────────
+// Deletes a specific session log by ID
+router.delete('/:id', async (req, res) => {
+  try {
+    await Analytics.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Session deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ── POST /api/analytics/seed ────────────────────────────────────────────────
+// Seeds the database with 30 days of sample study data for testing
+router.post('/seed', async (req, res) => {
+  try {
+    const existing = await Analytics.countDocuments();
+    if (existing > 0) {
+      return res.json({ message: `Already has ${existing} sessions. Delete them first to re-seed.` });
+    }
+
+    const subjects = ['React', 'Algorithms', 'Database', 'Web Design', 'Backend'];
+    const sessions = [];
+
+    // Generates 30 days of sample data going back from today
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+
+      // Skips some days to simulate realistic study patterns
+      if (Math.random() < 0.25) continue;
+
+      const subject      = subjects[Math.floor(Math.random() * subjects.length)];
+      const minutesStudied = Math.floor(Math.random() * 90) + 30; // 30-120 minutes
+      const pomodoroCount  = Math.floor(minutesStudied / 25);
+      const flashTotal     = Math.floor(Math.random() * 20) + 5;
+      const quizTotal      = Math.floor(Math.random() * 10) + 2;
+
+      sessions.push({
+        date,
+        subject,
+        minutesStudied,
+        sessionType:    'pomodoro',
+        flashcardStats: {
+          total:   flashTotal,
+          correct: Math.floor(flashTotal * (0.5 + Math.random() * 0.5)) // 50-100% correct
+        },
+        quizStats: {
+          total:   quizTotal,
+          correct: Math.floor(quizTotal * (0.4 + Math.random() * 0.6))  // 40-100% correct
+        },
+        goalCompleted:  Math.random() > 0.35, // ~65% goal completion rate
+        pomodoroCount
+      });
+    }
+
+    await Analytics.insertMany(sessions);
+    res.json({ message: `Seeded ${sessions.length} study sessions successfully` });
+  } catch (err) {
+    console.error('Seed error:', err.message);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+module.exports = router;

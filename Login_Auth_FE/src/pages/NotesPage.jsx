@@ -16,13 +16,13 @@ const NotesPage = () => {
     setLoading(true);
     try {
       const url = courseFilter
-        ? "http://localhost:3001/api/notes?course=" + courseFilter
+        ? "http://localhost:3001/api/notes?course=" + encodeURIComponent(courseFilter)
         : "http://localhost:3001/api/notes";
       const response = await axios.get(url);
       setNotes(response.data);
       setError("");
     } catch (err) {
-      setError("Failed to load notes. Please try again later.");
+      setError(err.response?.data?.message || "Failed to load notes. Please try again later.");
     } finally {
       setLoading(false);
     }

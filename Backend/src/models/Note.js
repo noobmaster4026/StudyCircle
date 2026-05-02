@@ -25,7 +25,7 @@ const noteSchema = new mongoose.Schema({
     uploadedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'UserData',
-        required: true
+        default: null
     },
     course: {
         type: String,

@@ -11,7 +11,9 @@ const Flashcard = require('./src/models/Flashcard');
 const multer = require('multer');
 const Note = require('./src/models/Note');
 const documentRoutes = require('./src/routes/documents');
+const notesRoutes = require('./src/routes/notesRoutes');
 const courseRoutes = require("./src/routes/courseRoutes");
+const userCourseRoutes = require("./src/routes/userCourseRoutes");
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const startReminderService = require('./src/utils/reminderService');
 
@@ -22,6 +24,8 @@ const quizRoutes = require('./src/routes/quizRoutes');
 
 // ✅ FIX: was './routes/studyGroupRoutes' — missing src/ prefix
 const studyGroupRoutes = require('./src/routes/studyGroupRoutes');
+const recommendationRoutes = require('./src/routes/recommendationRoutes');
+const analyticsRoutes = require('./src/routes/analyticsRoutes');
 
 // Connect to Database
 connectDB().then(() => startReminderService());
@@ -30,14 +34,18 @@ connectDB().then(() => startReminderService());
 app.use(cors());
 app.use(express.json());
 app.use('/api/documents', documentRoutes);
+app.use('/api/notes', notesRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/notifications', notificationRoutes);
 
 // Route Registration
-app.use("/api", routes);
+app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use("/api/courses", courseRoutes);
+app.use("/api/users", userCourseRoutes);
 app.use('/api/study-groups', studyGroupRoutes);
+app.use("/api", routes);
+app.use('/api/analytics', analyticsRoutes);
 
 // --- Auth & Admin Routes ---
 

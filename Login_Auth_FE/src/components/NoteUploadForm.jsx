@@ -29,7 +29,8 @@ const NoteUploadForm = ({ onUploadSuccess }) => {
     formData.append("description", description);
     formData.append("course", course);
     formData.append("file", file);
-    formData.append("uploadedBy", localStorage.getItem("userId") || "Anonymous");
+    const userId = localStorage.getItem("userId");
+    if (userId) formData.append("uploadedBy", userId);
 
     try {
       const response = await axios.post("http://localhost:3001/api/notes", formData, {

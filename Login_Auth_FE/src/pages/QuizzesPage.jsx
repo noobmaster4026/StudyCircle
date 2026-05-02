@@ -678,73 +678,57 @@ export default function QuizzesPage() {
 
 // ── Generator styles ──────────────────────────────────────────────
 const g = {
-  page:{ minHeight:'100vh', background:'#0A0A0F', color:'#F0EBE3', fontFamily:"'DM Mono', monospace", position:'relative', overflow:'hidden' },
-
-  noise:{ position:'fixed', inset:0, pointerEvents:'none', zIndex:0, opacity:0.6 },
-
-  header:{
-    display:'flex', justifyContent:'space-between', padding:'16px 32px',
-    borderBottomWidth:'1px', borderBottomStyle:'solid', borderBottomColor:'rgba(0,255,136,0.12)'
-  },
-
-  main:{ display:'grid', gridTemplateColumns:'1fr 300px' },
-
-  formPanel:{
-    padding:'40px 48px',
-    borderRightWidth:'1px', borderRightStyle:'solid', borderRightColor:'rgba(255,255,255,0.06)'
-  },
-
-  input:{
-    width:'100%',
-    background:'rgba(255,255,255,0.04)',
-    borderWidth:'1px',
-    borderStyle:'solid',
-    borderColor:'rgba(0,255,136,0.2)',
-    borderRadius:8,
-    padding:'13px 14px 13px 40px',
-    color:'#F0EBE3'
-  },
-
-  sugg:{
-    background:'#141420',
-    borderWidth:'1px',
-    borderStyle:'solid',
-    borderColor:'rgba(0,255,136,0.2)'
-  },
-
-  chip:{
-    padding:'9px 16px',
-    background:'rgba(255,255,255,0.04)',
-    borderWidth:'1px',
-    borderStyle:'solid',
-    borderColor:'rgba(255,255,255,0.1)'
-  },
-
-  chipOn:{
-    background:'rgba(0,255,136,0.08)',
-    borderColor:'#00FF88'
-  },
-
-  countChip:{
-    width:44, height:44,
-    borderWidth:'1px',
-    borderStyle:'solid',
-    borderColor:'rgba(255,255,255,0.1)'
-  },
-
-  countOn:{
-    borderColor:'#00FF88'
-  },
-
-  error:{
-    borderWidth:'1px',
-    borderStyle:'solid',
-    borderColor:'rgba(239,68,68,0.3)'
-  },
-
-  genBtn:{
-    border:'none' // safe
-  }
+  page:       { minHeight:'100vh', background:'#0A0A0F', color:'#F0EBE3', fontFamily:"'DM Mono', monospace", position:'relative', overflow:'hidden' },
+  noise:      { position:'fixed', inset:0, backgroundImage:`url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`, pointerEvents:'none', zIndex:0, opacity:0.6 },
+  header:     { display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 32px', borderBottom:'1px solid rgba(0,255,136,0.12)', position:'relative', zIndex:1 },
+  logo:       { fontFamily:'Syne Mono, monospace', fontSize:18, letterSpacing:2 },
+  logoBracket:{ color:'#00FF88' },
+  logoText:   { color:'#F0EBE3', margin:'0 4px' },
+  headerRight:{ display:'flex', alignItems:'center', gap:8, fontSize:11, color:'rgba(240,235,227,0.4)' },
+  statusDot:  { width:7, height:7, borderRadius:'50%', background:'#00FF88', boxShadow:'0 0 6px #00FF88', display:'inline-block' },
+  statusText: { fontFamily:'DM Mono, monospace' },
+  main:       { display:'grid', gridTemplateColumns:'1fr 300px', gap:0, minHeight:'calc(100vh - 60px)', position:'relative', zIndex:1 },
+  formPanel:  { padding:'40px 48px', borderRight:'1px solid rgba(255,255,255,0.06)' },
+  prompt:     { marginBottom:20, fontFamily:'Syne Mono, monospace', fontSize:13 },
+  promptSign: { color:'#00FF88' },
+  promptCmd:  { color:'rgba(240,235,227,0.5)' },
+  title:      { fontFamily:'Syne, sans-serif', fontWeight:800, fontSize:42, margin:'0 0 8px', lineHeight:1.1, letterSpacing:-1 },
+  cursor:     { color:'#00FF88', animation:'blink 1s step-end infinite' },
+  subtitle:   { fontSize:14, color:'rgba(240,235,227,0.45)', marginBottom:36, lineHeight:1.6 },
+  label:      { display:'block', fontSize:9, fontWeight:700, letterSpacing:2, color:'rgba(0,255,136,0.7)', marginBottom:10, textTransform:'uppercase' },
+  fieldWrap:  { marginBottom:28, position:'relative' },
+  inputWrap:  { position:'relative', display:'flex', alignItems:'center' },
+  inputIcon:  { position:'absolute', left:14, fontSize:16, color:'rgba(0,255,136,0.5)', pointerEvents:'none' },
+  input:      { width:'100%', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(0,255,136,0.2)', borderRadius:8, padding:'13px 14px 13px 40px', color:'#F0EBE3', fontFamily:'DM Mono, monospace', fontSize:14, outline:'none', boxSizing:'border-box', transition:'border-color 0.2s' },
+  sugg:       { position:'absolute', top:'100%', left:0, right:0, background:'#141420', border:'1px solid rgba(0,255,136,0.2)', borderRadius:8, marginTop:4, zIndex:10, overflow:'hidden' },
+  suggItem:   { display:'block', width:'100%', padding:'10px 14px', background:'transparent', border:'none', color:'rgba(240,235,227,0.7)', fontFamily:'DM Mono, monospace', fontSize:13, cursor:'pointer', textAlign:'left', transition:'background 0.12s' },
+  chipRow:    { display:'flex', flexWrap:'wrap', gap:8 },
+  chip:       { padding:'9px 16px', background:'rgba(255,255,255,0.04)', borderWidth:'1px', borderStyle:'solid', borderColor:'rgba(255,255,255,0.1)', borderRadius:8, color:'rgba(240,235,227,0.6)', fontFamily:'DM Mono, monospace', fontSize:12, cursor:'pointer', transition:'all 0.15s', display:'flex', alignItems:'center', gap:4 },
+  chipOn:     { background:'rgba(0,255,136,0.08)', borderColor:'#00FF88', color:'#00FF88' },
+  chipSub:    { fontSize:10, opacity:0.6, marginLeft:4 },
+  countChip:  { width:44, height:44, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, color:'rgba(240,235,227,0.6)', fontFamily:'Syne, sans-serif', fontWeight:800, fontSize:15, cursor:'pointer', transition:'all 0.15s', display:'flex', alignItems:'center', justifyContent:'center' },
+  countOn:    { background:'rgba(0,255,136,0.1)', border:'1px solid #00FF88', color:'#00FF88', boxShadow:'0 0 12px rgba(0,255,136,0.15)' },
+  error:      { background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:8, padding:'10px 14px', color:'#ef4444', fontSize:12, marginBottom:16 },
+  genBtn:     { width:'100%', padding:'16px', background:'#00FF88', border:'none', borderRadius:10, color:'#0A0A0F', fontFamily:'Syne, sans-serif', fontWeight:800, fontSize:16, cursor:'pointer', transition:'all 0.2s', letterSpacing:0.5 },
+  genBtnInner:{ display:'flex', alignItems:'center', justifyContent:'center', gap:10 },
+  genBtnIcon: { fontSize:18 },
+  genBtnHint: { fontSize:11, opacity:0.5, fontFamily:'DM Mono, monospace', fontWeight:400 },
+  spinner:    { width:16, height:16, border:'2px solid rgba(10,10,15,0.3)', borderTop:'2px solid #0A0A0F', borderRadius:'50%', display:'inline-block', animation:'spin 0.7s linear infinite' },
+  loadingLog: { marginTop:20, padding:'16px', background:'rgba(0,255,136,0.04)', border:'1px solid rgba(0,255,136,0.12)', borderRadius:8 },
+  histPanel:  { padding:'32px 24px', background:'rgba(0,0,0,0.2)' },
+  histHeader: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 },
+  histTitle:  { fontSize:9, fontWeight:700, letterSpacing:2, color:'rgba(0,255,136,0.6)' },
+  histCount:  { background:'rgba(0,255,136,0.1)', color:'#00FF88', borderRadius:20, padding:'1px 8px', fontSize:10 },
+  histEmpty:  { display:'flex', flexDirection:'column', alignItems:'center', paddingTop:40 },
+  histItem:   { padding:'12px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:8, marginBottom:8, cursor:'default' },
+  histItemTop:{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:5 },
+  histTopic:  { fontSize:13, fontWeight:600, color:'#F0EBE3', fontFamily:'Syne, sans-serif' },
+  histScore:  { fontSize:12, fontWeight:700, fontFamily:'DM Mono' },
+  histItemSub:{ display:'flex', gap:6, alignItems:'center' },
+  histDiff:   { fontSize:10, fontWeight:600 },
+  histDot:    { fontSize:10, opacity:0.3 },
+  histQ:      { fontSize:10, color:'rgba(240,235,227,0.4)' },
+  histDate:   { fontSize:10, color:'rgba(240,235,227,0.3)' },
 };
 
 // ── Quiz interface styles ────────────────────────────────────────────
@@ -765,33 +749,19 @@ const qi = {
   qNum:       { fontFamily:'Syne Mono, monospace', fontSize:11, color:'rgba(0,255,136,0.6)', letterSpacing:2, marginBottom:16 },
   qText:      { fontFamily:'Syne, sans-serif', fontWeight:700, fontSize:20, lineHeight:1.4, marginBottom:28, color:'#F0EBE3', minHeight:56 },
   options:    { display:'flex', flexDirection:'column', gap:10, marginBottom:24 },
-  option:{
-  display:'flex',
-  borderWidth:'1.5px',
-  borderStyle:'solid',
-  borderColor:'rgba(255,255,255,0.08)'
-  },
+  option:     { display:'flex', alignItems:'center', gap:14, padding:'14px 18px', background:'rgba(255,255,255,0.04)', border:'1.5px solid rgba(255,255,255,0.08)', borderRadius:10, cursor:'pointer', textAlign:'left', fontFamily:'DM Mono, monospace', fontSize:13, color:'#F0EBE3', transition:'all 0.15s', position:'relative' },
   opt_idle:   {},
-  opt_selected:{
-  borderColor:'#00FF88'
-  },
-  opt_correct:{
-  borderColor:'#22c55e'
-  },
-  opt_wrong:{
-  borderColor:'#ef4444'
-  },
- optLabel:   { width:28, height:28, borderRadius:6, background:'rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Syne Mono, monospace', fontSize:12, fontWeight:700, flexShrink:0 },
+  opt_selected:{ border:'1.5px solid #00FF88', background:'rgba(0,255,136,0.08)' },
+  opt_correct:{ border:'1.5px solid #22c55e', background:'rgba(34,197,94,0.12)' },
+  opt_wrong:  { border:'1.5px solid #ef4444', background:'rgba(239,68,68,0.08)' },
+  optLabel:   { width:28, height:28, borderRadius:6, background:'rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Syne Mono, monospace', fontSize:12, fontWeight:700, flexShrink:0 },
   lbl_correct:{ background:'rgba(34,197,94,0.2)', color:'#22c55e' },
   lbl_wrong:  { background:'rgba(239,68,68,0.2)', color:'#ef4444' },
   lbl_selected:{ background:'rgba(0,255,136,0.2)', color:'#00FF88' },
   optText:    { flex:1, lineHeight:1.5 },
   optIcon:    { marginLeft:'auto', fontSize:16, flexShrink:0 },
   optKey:     { marginLeft:'auto', fontSize:10, color:'rgba(240,235,227,0.2)', fontFamily:'DM Mono' },
-  explanation:{
-  borderWidth:'1px',
-  borderStyle:'solid'
-  },
+  explanation:{ padding:'16px 20px', borderWidth:'1px', borderStyle:'solid', borderColor:'transparent', borderRadius:10, marginBottom:20 },
   explHeader: { fontWeight:700, fontSize:13, marginBottom:8, fontFamily:'Syne, sans-serif' },
   explText:   { fontSize:13, lineHeight:1.65, color:'rgba(240,235,227,0.7)', margin:0 },
   nextBtn:    { width:'100%', padding:'14px', background:'#00FF88', border:'none', borderRadius:10, color:'#0A0A0F', fontFamily:'Syne, sans-serif', fontWeight:800, fontSize:15, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:12, transition:'all 0.15s' },
@@ -811,23 +781,13 @@ const r = {
   headerTitle:{ fontFamily:'Syne, sans-serif', fontWeight:800, fontSize:14, color:'rgba(240,235,227,0.7)' },
   main:       { maxWidth:840, margin:'0 auto', padding:'40px 24px', position:'relative', zIndex:1 },
   scoreHero:  { textAlign:'center', marginBottom:40 },
-  gradeTag:   { display:'inline-block', border:'1.5px solid', borderRadius:4, padding:'4px 16px', fontSize:11, fontFamily:'Syne Mono, monospace', letterSpacing:2, marginBottom:20 },
+  gradeTag:   { display:'inline-block', borderWidth:'1.5px', borderStyle:'solid', borderColor:'transparent', borderRadius:4, padding:'4px 16px', fontSize:11, fontFamily:'Syne Mono, monospace', letterSpacing:2, marginBottom:20 },
   scoreCircle:{ position:'relative', width:140, height:140, margin:'0 auto 16px' },
   scoreInner: { position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' },
   scorePct:   { fontFamily:'Syne, sans-serif', fontWeight:800, fontSize:32, lineHeight:1 },
   scoreLabel: { fontSize:11, color:'rgba(240,235,227,0.4)', marginTop:2 },
   gradeMsg:   { fontSize:14, color:'rgba(240,235,227,0.55)', marginBottom:24 },
-  statRow:{
-  display:'inline-flex',
-  alignItems:'center',
-  justifyContent:'center',
-  background:'rgba(255,255,255,0.03)',
-  borderWidth:'1px',
-  borderStyle:'solid',
-  borderColor:'rgba(255,255,255,0.07)',
-  borderRadius:12,
-  padding:'16px 24px'
-  },
+  statRow:    { display:'inline-flex', alignItems:'center', justifyContent:'center', gap:0, background:'rgba(255,255,255,0.03)', borderWidth:'1px', borderStyle:'solid', borderColor:'rgba(255,255,255,0.07)', borderRadius:12, padding:'16px 24px' },
   stat:       { display:'flex', flexDirection:'column', gap:4, padding:'0 20px' },
   statVal:    { fontFamily:'Syne, sans-serif', fontWeight:800, fontSize:18, color:'#F0EBE3' },
   statKey:    { fontSize:10, color:'rgba(240,235,227,0.35)', textTransform:'uppercase', letterSpacing:1 },
@@ -836,19 +796,19 @@ const r = {
   tab:        { padding:'9px 20px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:8, color:'rgba(240,235,227,0.5)', cursor:'pointer', fontSize:13, fontFamily:'DM Mono', transition:'all 0.15s' },
   tabOn:      { background:'rgba(0,255,136,0.08)', border:'1px solid rgba(0,255,136,0.3)', color:'#00FF88' },
   summaryGrid:{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:32 },
-  summaryItem:{ display:'grid', gridTemplateColumns:'28px 40px 1fr auto', alignItems:'center', gap:10, padding:'12px 14px', background:'rgba(255,255,255,0.03)', border:'1px solid', borderRadius:8, cursor:'pointer', transition:'background 0.12s' },
+  summaryItem:{ display:'grid', gridTemplateColumns:'28px 40px 1fr auto', alignItems:'center', gap:10, padding:'12px 14px', background:'rgba(255,255,255,0.03)', borderWidth:'1px', borderStyle:'solid', borderColor:'transparent', borderRadius:8, cursor:'pointer', transition:'background 0.12s' },
   summaryDot: { width:24, height:24, borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', color:'#0A0A0F', fontSize:12, fontWeight:700, flexShrink:0 },
   summaryQ:   { fontFamily:'Syne Mono, monospace', fontSize:12, color:'rgba(240,235,227,0.4)' },
   summarySnippet:{ fontSize:12, color:'rgba(240,235,227,0.65)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' },
   summaryAns: { fontSize:11, fontFamily:'DM Mono', flexShrink:0 },
   reviewList: { display:'flex', flexDirection:'column', gap:16, marginBottom:32 },
-  reviewCard: { background:'rgba(255,255,255,0.03)', border:'1px solid', borderRadius:12, padding:'20px 24px' },
+  reviewCard: { background:'rgba(255,255,255,0.03)', borderWidth:'1px', borderStyle:'solid', borderColor:'transparent', borderRadius:12, padding:'20px 24px' },
   reviewHead: { display:'flex', justifyContent:'space-between', marginBottom:12 },
   reviewNum:  { fontFamily:'Syne Mono, monospace', fontSize:12, fontWeight:700 },
   reviewStatus:{ fontSize:12, fontWeight:700 },
   reviewQ:    { fontFamily:'Syne, sans-serif', fontWeight:700, fontSize:15, marginBottom:16, lineHeight:1.4, color:'#F0EBE3' },
   reviewOpts: { display:'flex', flexDirection:'column', gap:6, marginBottom:14 },
-  reviewOpt:  { display:'flex', alignItems:'center', gap:10, padding:'10px 14px', border:'1px solid', borderRadius:8, fontSize:13 },
+  reviewOpt:  { display:'flex', alignItems:'center', gap:10, padding:'10px 14px', borderWidth:'1px', borderStyle:'solid', borderColor:'transparent', borderRadius:8, fontSize:13 },
   reviewOptLbl:{ fontFamily:'Syne Mono, monospace', fontSize:11, fontWeight:700, flexShrink:0, width:20 },
   explBox:    { display:'flex', gap:10, padding:'12px 14px', background:'rgba(255,255,255,0.03)', borderRadius:8, marginTop:4 },
   explIcon:   { fontSize:16, flexShrink:0 },

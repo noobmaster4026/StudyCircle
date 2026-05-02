@@ -46,6 +46,11 @@ function Login() {
         localStorage.setItem("userName", result.name);
         localStorage.setItem("userId", result.userId);
         localStorage.setItem("userRole", result.role);
+        localStorage.setItem("user", JSON.stringify({
+          id: result.userId,
+          name: result.name,
+          role: result.role,
+        }));
         setTimeout(() => navigateByRole(result.role), 1500);
       } else {
         if (result.message === "Incorrect password") {

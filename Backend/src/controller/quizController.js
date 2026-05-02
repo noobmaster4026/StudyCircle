@@ -2,7 +2,7 @@ const axios = require('axios');
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_URL     = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free';
+const MODEL              = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free';
 
 // In-memory quiz store (replace with a Mongoose model if you want persistence)
 // Shape: { id, userId, topic, difficulty, questions, createdAt }
@@ -107,20 +107,32 @@ const generateQuiz = async (req, res) => {
 
     const raw = response.data?.choices?.[0]?.message?.content || '';
 
-    // Strip markdown fences if the model wrapped JSON anyway
-    const cleaned = raw
+    // Nemotron and other reasoning models wrap output in <think>...</think> before the JSON.
+    // Strip everything up to and including the closing </think> tag first.
+    let stripped = raw.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+    // Strip markdown fences (some models add these despite being told not to)
+    stripped = stripped
       .replace(/^```(?:json)?\s*/i, '')
-      .replace(/\s*```\s*$/, '')
+      .replace(/\s*```\s*$/,       '')
       .trim();
 
     let parsed;
     try {
-      parsed = JSON.parse(cleaned);
+      parsed = JSON.parse(stripped);
     } catch {
-      // Try to extract the first JSON object from the response
-      const match = cleaned.match(/\{[\s\S]*\}/);
-      if (!match) throw new Error('Model did not return valid JSON.');
-      parsed = JSON.parse(match[0]);
+      // Last resort: pull the first { ... } block out of whatever the model returned
+      const match = stripped.match(/\{[\s\S]*\}/);
+      if (!match) {
+        console.error('[QuizController] Raw model output:', raw.slice(0, 500));
+        throw new Error('Model did not return valid JSON. Try again.');
+      }
+      try {
+        parsed = JSON.parse(match[0]);
+      } catch (e2) {
+        console.error('[QuizController] JSON extract failed:', match[0].slice(0, 300));
+        throw new Error('Could not parse model response. Try again.');
+      }
     }
 
     if (!parsed.questions || !Array.isArray(parsed.questions)) {

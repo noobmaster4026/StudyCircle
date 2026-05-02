@@ -16,9 +16,16 @@ const MyCoursesPage = () => {
   const [search,      setSearch]      = useState("");
   const [error,       setError]       = useState("");
 
-  const user = useMemo(() => {
-    try { return JSON.parse(localStorage.getItem("user") || "null"); }
-    catch { return null; }
+  const userId = useMemo(() => {
+    const storedUserId = localStorage.getItem("userId");
+    if (storedUserId) return storedUserId;
+
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user") || "null");
+      return storedUser?.id || storedUser?._id || "";
+    } catch {
+      return "";
+    }
   }, []);
 
   // Load all available courses
@@ -40,20 +47,28 @@ const MyCoursesPage = () => {
 
   // Load this student's enrolled course IDs
   useEffect(() => {
-    if (!user?.id) return;
+    if (!userId) {
+      setError("Please log in again before adding courses.");
+      return;
+    }
+
     const load = async () => {
       try {
-        const res  = await fetch(`${USERS_API}/${user.id}/courses`);
+        const res  = await fetch(`${USERS_API}/${userId}/courses`);
         const data = await res.json();
         if (res.ok) {
           setSelectedIds((data.courses || []).map((c) =>
             typeof c === "string" ? c : c._id
           ));
+        } else {
+          setError(data.message || "Failed to load your enrolled courses.");
         }
-      } catch {}
+      } catch {
+        setError("Could not load your enrolled courses.");
+      }
     };
     load();
-  }, [user?.id]);
+  }, [userId]);
 
   const selectedCourses  = allCourses.filter((c) => selectedIds.includes(c._id));
   const availableCourses = allCourses
@@ -66,11 +81,16 @@ const MyCoursesPage = () => {
     );
 
   const handleAdd = async (courseId) => {
-    if (selectedIds.length >= MAX_COURSES || !user?.id) return;
+    if (selectedIds.length >= MAX_COURSES) return;
+    if (!userId) {
+      setError("Please log in again before adding courses.");
+      return;
+    }
+
     setUpdatingId(courseId);
     setError("");
     try {
-      const res  = await fetch(`${USERS_API}/${user.id}/courses`, {
+      const res  = await fetch(`${USERS_API}/${userId}/courses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ courseId }),
@@ -91,11 +111,15 @@ const MyCoursesPage = () => {
   };
 
   const handleDrop = async (courseId) => {
-    if (!user?.id) return;
+    if (!userId) {
+      setError("Please log in again before dropping courses.");
+      return;
+    }
+
     setUpdatingId(courseId);
     setError("");
     try {
-      const res  = await fetch(`${USERS_API}/${user.id}/courses/${courseId}`, {
+      const res  = await fetch(`${USERS_API}/${userId}/courses/${courseId}`, {
         method: "DELETE",
       });
       const data = await res.json();

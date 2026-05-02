@@ -1,15 +1,22 @@
-const express = require("express");
+const express = require('express');
+const router  = express.Router();
 const {
-    registerUser,
-    getUserCourses,
-    addUserCourse,
-    removeUserCourse
-} = require("../controller/userController");
-const router = express.Router();
+  generateQuiz,
+  saveResult,
+  getHistory,
+  getQuizById,
+} = require('../controller/quizController');
 
-router.post("/register", registerUser);
-router.get("/:id/courses", getUserCourses);
-router.post("/:id/courses", addUserCourse);
-router.delete("/:id/courses/:courseId", removeUserCourse);
+// POST /api/quiz/generate        — AI quiz generation
+router.post('/generate', generateQuiz);
+
+// POST /api/quiz/save-result     — save a completed attempt
+router.post('/save-result', saveResult);
+
+// GET  /api/quiz/history         — ?userId=xxx
+router.get('/history', getHistory);
+
+// GET  /api/quiz/:id             — fetch a specific quiz by id
+router.get('/:id', getQuizById);
 
 module.exports = router;

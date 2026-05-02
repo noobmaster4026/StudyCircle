@@ -137,6 +137,22 @@ function StudentDashboard() {
       action: () => navigate("/quizzes"),
       btnText: "Generate Quiz",
     },
+    {
+      num: "11. RECOMMENDATIONS",
+      title: "What to Study Next",
+      desc: "Get personalized study recommendations based on your subjects, goals, and upcoming deadlines. Rate suggestions to improve future picks.",
+      img: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/recommendations"),
+      btnText: "View Recommendations",
+    },
+    {
+      num: "12. ANALYTICS",
+      title: "Track Your Progress",
+      desc: "See your study hours, quiz trends, flashcard retention, streak, and Pomodoro heatmap all in one place. Log sessions and watch your growth over time.",
+      img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/analytics"),
+      btnText: "View Analytics",
+    },
   ];
 
   return (

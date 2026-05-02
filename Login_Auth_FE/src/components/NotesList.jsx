@@ -16,7 +16,7 @@ const NotesList = ({ notes, onDelete }) => {
   };
 
   const currentUserId = localStorage.getItem("userId");
-  const isAdmin = localStorage.getItem("role") === "admin";
+  const isAdmin = localStorage.getItem("userRole") === "admin";
 
   return (
     <div className={styles.notesGrid}>
