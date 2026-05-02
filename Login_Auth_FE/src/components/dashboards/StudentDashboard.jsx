@@ -153,6 +153,46 @@ function StudentDashboard() {
       action: () => navigate("/analytics"),
       btnText: "View Analytics",
     },
+    {
+      num: "13. STUDY SESSIONS",
+      title: "Create & Join",
+      desc: "Create focused study sessions, set a topic and seat limit, then join classmates for quick peer learning.",
+      img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2671&auto=format&fit=crop",
+      action: () => navigate("/study-session"),
+      btnText: "Open Sessions",
+    },
+    {
+      num: "14. STUDY SCHEDULE",
+      title: "Plan Your Week",
+      desc: "Generate a practical weekly study plan from your subjects, available hours, preferred days, and exam focus.",
+      img: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=2668&auto=format&fit=crop",
+      action: () => navigate("/study-schedule"),
+      btnText: "Generate Plan",
+    },
+    {
+      num: "15. TUTORS",
+      title: "Find a Tutor",
+      desc: "Browse available tutors, compare course expertise and tuition fee, then save a booking request.",
+      img: "https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/tutor-marketplace"),
+      btnText: "Browse Tutors",
+    },
+    {
+      num: "16. PEER RATINGS",
+      title: "Rate Study Partners",
+      desc: "Leave helpful ratings after group work so reliable, supportive classmates are easier to recognize.",
+      img: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/peer-ratings"),
+      btnText: "Rate Peers",
+    },
+    {
+      num: "17. REMINDERS",
+      title: "Never Miss Study Time",
+      desc: "Create reminders for goals, review blocks, study sessions, and upcoming exam preparation.",
+      img: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/reminders"),
+      btnText: "Set Reminders",
+    },
   ];
 
   return (

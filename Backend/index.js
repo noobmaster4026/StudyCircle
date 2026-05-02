@@ -44,8 +44,8 @@ app.use('/api/quiz', quizRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/users", userCourseRoutes);
 app.use('/api/study-groups', studyGroupRoutes);
-app.use("/api", routes);
 app.use('/api/analytics', analyticsRoutes);
+app.use("/api", routes);
 
 // --- Auth & Admin Routes ---
 

@@ -6,6 +6,7 @@ const Analytics = require('../models/Analytics');
 // Returns a Date object set to the beginning of the requested period
 const getPeriodStart = (period) => {
   const now = new Date();
+  now.setHours(0, 0, 0, 0);
   if (period === 'week') {
     // Gets the most recent Monday as start of week
     const day  = now.getDay();
@@ -61,8 +62,10 @@ router.get('/summary', async (req, res) => {
     sessions.forEach(s => {
       const dateKey = s.date.toISOString().split('T')[0];
       if (!quizByDate[dateKey]) quizByDate[dateKey] = { total: 0, correct: 0 };
-      quizByDate[dateKey].total   += s.quizStats.total;
-      quizByDate[dateKey].correct += s.quizStats.correct;
+      const quizTotal = Math.max(0, Number(s.quizStats?.total || 0));
+      const quizCorrect = Math.min(quizTotal, Math.max(0, Number(s.quizStats?.correct || 0)));
+      quizByDate[dateKey].total   += quizTotal;
+      quizByDate[dateKey].correct += quizCorrect;
     });
     const quizTrend = Object.entries(quizByDate).map(([date, stats]) => ({
       date,
@@ -70,8 +73,14 @@ router.get('/summary', async (req, res) => {
     }));
 
     // ── Flashcard retention rate ────────────────────────────────────────────
-    const totalCards   = sessions.reduce((sum, s) => sum + s.flashcardStats.total,   0);
-    const correctCards = sessions.reduce((sum, s) => sum + s.flashcardStats.correct, 0);
+    const totalCards = sessions.reduce((sum, s) => (
+      sum + Math.max(0, Number(s.flashcardStats?.total || 0))
+    ), 0);
+    const correctCards = sessions.reduce((sum, s) => {
+      const total = Math.max(0, Number(s.flashcardStats?.total || 0));
+      const correct = Math.min(total, Math.max(0, Number(s.flashcardStats?.correct || 0)));
+      return sum + correct;
+    }, 0);
     const flashcardRetention = totalCards > 0
       ? Math.round((correctCards / totalCards) * 100)
       : 0;
@@ -171,8 +180,20 @@ router.post('/', async (req, res) => {
       subject,
       minutesStudied,
       sessionType:    sessionType    || 'manual',
-      flashcardStats: flashcardStats || { total: 0, correct: 0 },
-      quizStats:      quizStats      || { total: 0, correct: 0 },
+      flashcardStats: {
+        total: Math.max(0, Number(flashcardStats?.total || 0)),
+        correct: Math.min(
+          Math.max(0, Number(flashcardStats?.total || 0)),
+          Math.max(0, Number(flashcardStats?.correct || 0))
+        )
+      },
+      quizStats: {
+        total: Math.max(0, Number(quizStats?.total || 0)),
+        correct: Math.min(
+          Math.max(0, Number(quizStats?.total || 0)),
+          Math.max(0, Number(quizStats?.correct || 0))
+        )
+      },
       goalCompleted:  goalCompleted  || false,
       pomodoroCount:  pomodoroCount  || 0
     });
@@ -197,48 +218,99 @@ router.delete('/:id', async (req, res) => {
 });
 
 // ── POST /api/analytics/seed ────────────────────────────────────────────────
-// Seeds the database with 30 days of sample study data for testing
+// Seeds the database with deterministic sample study data for testing
 router.post('/seed', async (req, res) => {
   try {
+    const shouldReset = req.query.reset === 'true' || req.body?.reset === true;
     const existing = await Analytics.countDocuments();
     if (existing > 0) {
-      return res.json({ message: `Already has ${existing} sessions. Delete them first to re-seed.` });
+      if (!shouldReset) {
+        return res.json({
+          message: `Already has ${existing} sessions. Add ?reset=true to replace them with sample data.`
+        });
+      }
+      await Analytics.deleteMany({});
     }
 
-    const subjects = ['React', 'Algorithms', 'Database', 'Web Design', 'Backend'];
-    const sessions = [];
-
-    // Generates 30 days of sample data going back from today
-    for (let i = 29; i >= 0; i--) {
+    const makeDate = (daysAgo) => {
       const date = new Date();
-      date.setDate(date.getDate() - i);
+      date.setDate(date.getDate() - daysAgo);
+      date.setHours(12, 0, 0, 0);
+      return date;
+    };
 
-      // Skips some days to simulate realistic study patterns
-      if (Math.random() < 0.25) continue;
-
-      const subject      = subjects[Math.floor(Math.random() * subjects.length)];
-      const minutesStudied = Math.floor(Math.random() * 90) + 30; // 30-120 minutes
-      const pomodoroCount  = Math.floor(minutesStudied / 25);
-      const flashTotal     = Math.floor(Math.random() * 20) + 5;
-      const quizTotal      = Math.floor(Math.random() * 10) + 2;
-
-      sessions.push({
-        date,
-        subject,
-        minutesStudied,
-        sessionType:    'pomodoro',
-        flashcardStats: {
-          total:   flashTotal,
-          correct: Math.floor(flashTotal * (0.5 + Math.random() * 0.5)) // 50-100% correct
-        },
-        quizStats: {
-          total:   quizTotal,
-          correct: Math.floor(quizTotal * (0.4 + Math.random() * 0.6))  // 40-100% correct
-        },
-        goalCompleted:  Math.random() > 0.35, // ~65% goal completion rate
-        pomodoroCount
-      });
-    }
+    const sessions = [
+      {
+        date: makeDate(4),
+        subject: 'React',
+        minutesStudied: 75,
+        sessionType: 'pomodoro',
+        flashcardStats: { total: 10, correct: 5 },
+        quizStats: { total: 10, correct: 5 },
+        goalCompleted: true,
+        pomodoroCount: 3
+      },
+      {
+        date: makeDate(3),
+        subject: 'React',
+        minutesStudied: 95,
+        sessionType: 'pomodoro',
+        flashcardStats: { total: 15, correct: 6 },
+        quizStats: { total: 12, correct: 5 },
+        goalCompleted: true,
+        pomodoroCount: 4
+      },
+      {
+        date: makeDate(2),
+        subject: 'thms',
+        minutesStudied: 58,
+        sessionType: 'manual',
+        flashcardStats: { total: 18, correct: 8 },
+        quizStats: { total: 12, correct: 8 },
+        goalCompleted: true,
+        pomodoroCount: 2
+      },
+      {
+        date: makeDate(1),
+        subject: 'Database',
+        minutesStudied: 53,
+        sessionType: 'flashcard',
+        flashcardStats: { total: 14, correct: 6 },
+        quizStats: { total: 10, correct: 8 },
+        goalCompleted: true,
+        pomodoroCount: 2
+      },
+      {
+        date: makeDate(0),
+        subject: 'React',
+        minutesStudied: 69,
+        sessionType: 'pomodoro',
+        flashcardStats: { total: 20, correct: 10 },
+        quizStats: { total: 5, correct: 1 },
+        goalCompleted: true,
+        pomodoroCount: 3
+      },
+      {
+        date: makeDate(0),
+        subject: 'react',
+        minutesStudied: 80,
+        sessionType: 'manual',
+        flashcardStats: { total: 16, correct: 8 },
+        quizStats: { total: 4, correct: 1 },
+        goalCompleted: true,
+        pomodoroCount: 1
+      },
+      {
+        date: makeDate(0),
+        subject: 'ML',
+        minutesStudied: 18,
+        sessionType: 'manual',
+        flashcardStats: { total: 8, correct: 4 },
+        quizStats: { total: 4, correct: 1 },
+        goalCompleted: false,
+        pomodoroCount: 1
+      }
+    ];
 
     await Analytics.insertMany(sessions);
     res.json({ message: `Seeded ${sessions.length} study sessions successfully` });

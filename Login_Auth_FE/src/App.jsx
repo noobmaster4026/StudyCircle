@@ -20,6 +20,13 @@ import RecommendationsPage from "./pages/RecommendationsPage";
 import SharedWhiteboard from "./components/whiteboard/SharedWhiteboard";
 import ParticleBackground from "./components/ParticleBackground";
 import AnalyticsPage from './pages/AnalyticsPage';
+import {
+  PeerRatingsPage,
+  StudyRemindersPage,
+  StudySchedulePage,
+  StudySessionsPage,
+  TutorMarketplacePage,
+} from "./pages/StudentFeaturePages";
 import "./App.css";
 
 const meetSocket = io("http://localhost:5000", {
@@ -68,6 +75,11 @@ function App() {
         <Route path="/whiteboard"         element={<Navigate to="/whiteboard/shared-board" replace />} />
         <Route path="/whiteboard/:roomId" element={<SharedWhiteboard />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/study-session" element={<StudySessionsPage />} />
+        <Route path="/study-schedule" element={<StudySchedulePage />} />
+        <Route path="/tutor-marketplace" element={<TutorMarketplacePage />} />
+        <Route path="/peer-ratings" element={<PeerRatingsPage />} />
+        <Route path="/reminders" element={<StudyRemindersPage />} />
       </Routes>
     </BrowserRouter>
   );

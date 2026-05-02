@@ -1,0 +1,282 @@
+.sg-root {
+  color: #111827;
+}
+
+.sg-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.25rem;
+  align-items: stretch;
+  margin-bottom: 1.5rem;
+}
+
+.sg-title {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 700;
+}
+
+.sg-subtitle {
+  margin: 0.35rem 0 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.sg-hero-card,
+.sg-card {
+  background: #ffffff;
+  border-radius: 0.9rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.sg-hero-card {
+  min-width: 220px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.sg-hero-label,
+.sg-muted {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.sg-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(360px, 1.4fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.sg-card {
+  padding: 1.25rem;
+}
+
+.sg-history-card {
+  grid-column: 1 / -1;
+}
+
+.sg-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sg-card-title {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.sg-card-header .sg-card-title {
+  margin-bottom: 0;
+}
+
+.sg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.sg-input,
+.sg-textarea {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.65rem;
+  padding: 0.7rem 0.8rem;
+  font: inherit;
+  font-weight: 400;
+  background: #f9fafb;
+  color: #111827;
+  outline: none;
+}
+
+.sg-input:focus,
+.sg-textarea:focus {
+  border-color: #4f46e5;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14);
+}
+
+.sg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.sg-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.15rem 0 0.9rem;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.sg-check input {
+  accent-color: #4f46e5;
+}
+
+.sg-day-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sg-day-btn {
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #f9fafb;
+  color: #374151;
+  padding: 0.45rem 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sg-day-active {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #ffffff;
+}
+
+.sg-primary-btn {
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
+  background: #4f46e5;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sg-primary-btn:hover {
+  background: #4338ca;
+}
+
+.sg-primary-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.sg-pill {
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.sg-plan-head h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.sg-plan-head p {
+  margin: 0.35rem 0 1rem;
+  color: #6b7280;
+}
+
+.sg-schedule-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.sg-day-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.8rem;
+  padding: 0.85rem;
+  background: #f9fafb;
+}
+
+.sg-day-card h4 {
+  margin: 0 0 0.65rem;
+  color: #4f46e5;
+}
+
+.sg-block {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.sg-block:first-of-type {
+  border-top: none;
+}
+
+.sg-block-time {
+  font-weight: 800;
+  color: #111827;
+}
+
+.sg-block p {
+  margin: 0.2rem 0 0;
+  color: #6b7280;
+  font-size: 0.88rem;
+}
+
+.sg-history-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.75rem;
+}
+
+.sg-history-card .sg-card-title,
+.sg-history-card .sg-muted {
+  grid-column: 1 / -1;
+}
+
+.sg-history-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background: #f9fafb;
+  padding: 0.85rem;
+  text-align: left;
+  color: #111827;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sg-history-item span {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.sg-history-active {
+  border-color: #4f46e5;
+  background: #eef2ff;
+}
+
+@media (max-width: 980px) {
+  .sg-hero,
+  .sg-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sg-hero {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 620px) {
+  .sg-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sg-block {
+    grid-template-columns: 1fr;
+  }
+}

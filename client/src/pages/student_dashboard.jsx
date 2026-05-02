@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import StudentLayout from './student_layout'
 import '../styles/student_dashboard.css'
 
 export default function StudentDashboard() {
+  const navigate = useNavigate()
   const [courses, setCourses] = useState([])
   const [selectedCourseIds, setSelectedCourseIds] = useState([])
   const [loadingCourses, setLoadingCourses] = useState(false)
@@ -34,21 +36,6 @@ export default function StudentDashboard() {
       return null
     }
   }, [])
-
-  const initial = (user?.name?.[0] || user?.email?.[0] || '?').toUpperCase()
-
-  const handleSettings = () => {
-    setIsProfileMenuOpen(false)
-    navigate('/settings')
-  }
-
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    setIsProfileMenuOpen(false)
-    toast.success('Logged out successfully')
-    navigate('/')
-  }
 
   // Load all available courses
   useEffect(() => {
@@ -180,6 +167,36 @@ export default function StudentDashboard() {
       <p className="sd-page-subtitle">
         Browse available courses and add or drop them from your list.
       </p>
+
+      <div className="sd-feature-grid">
+        <button
+          type="button"
+          className="sd-feature-card"
+          onClick={() => navigate('/study-schedule')}
+        >
+          <span className="sd-feature-label">AI planner</span>
+          <strong>Study schedule generator</strong>
+          <span>Create a weekly plan from your courses and goals.</span>
+        </button>
+        <button
+          type="button"
+          className="sd-feature-card"
+          onClick={() => navigate('/study-session')}
+        >
+          <span className="sd-feature-label">Peer study</span>
+          <strong>Create or join sessions</strong>
+          <span>Use invite codes, seats, and ratings with classmates.</span>
+        </button>
+        <button
+          type="button"
+          className="sd-feature-card"
+          onClick={() => navigate('/tutor-marketplace')}
+        >
+          <span className="sd-feature-label">Marketplace</span>
+          <strong>Book a tutor</strong>
+          <span>Find teachers by course offer and tuition fee.</span>
+        </button>
+      </div>
 
       <div className="sd-course-columns">
         <section className="sd-course-card">

@@ -10,25 +10,28 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const API = 'http://localhost:3001/api/analytics';
 
 const PERIODS = [
-  { value: 'week',  label: 'This Week'  },
-  { value: 'month', label: 'This Month' },
-  { value: 'year',  label: 'This Year'  },
-  { value: 'all',   label: 'All Time'   },
+  { value: 'week',  label: 'Week'  },
+  { value: 'month', label: 'Month' },
+  { value: 'year',  label: 'Year'  },
+  { value: 'all',   label: 'All'   },
 ];
 
 const SESSION_TYPES = ['manual', 'pomodoro', 'flashcard'];
 
 // Fixed colour palette for subjects — cycles if more than 8 subjects
-const SUBJECT_COLORS = [
-  '#6366f1','#22c55e','#f59e0b','#0891b2',
-  '#ec4899','#ef4444','#8b5cf6','#14b8a6',
-];
+const SUBJECT_COLORS = {
+  React: '#6366f1',
+  ML: '#0891b2',
+  react: '#ef4444',
+  Database: '#f59e0b',
+  thms: '#22c55e',
+};
+const SUBJECT_FALLBACK_COLORS = ['#8b5cf6', '#14b8a6', '#ec4899', '#84cc16'];
 
 // Heatmap colour scale: 0 sessions → 4+ sessions
 const HEAT_COLORS = ['#f1f5f9','#c7d2fe','#818cf8','#6366f1','#3730a3'];
@@ -41,57 +44,74 @@ function heatColor(count) {
 }
 
 // ── SVG Bar Chart ──────────────────────────────────────────────────
-function BarChart({ data, color = '#6366f1', label = 'hours' }) {
+function formatShortDate(date) {
+  return new Date(`${date}T00:00:00`).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+function formatHours(hours) {
+  return Number(hours || 0).toFixed(2).replace(/\.?0+$/, '');
+}
+
+// ── SVG Bar Chart ──────────────────────────────────────────────────
+function BarChart({ data, color = '#6366f1' }) {
   if (!data || data.length === 0) return <p className="no-data">No data for this period.</p>;
 
-  const W = 600, H = 160, PAD = 40, BAR_GAP = 4;
-  const max    = Math.max(...data.map(d => d.hours), 0.1);
-  const barW   = Math.max(8, Math.floor((W - PAD * 2) / data.length) - BAR_GAP);
+  const W = 620, H = 190, PAD_L = 54, PAD_R = 20, PAD_T = 12, PAD_B = 30;
+  const chartH = H - PAD_T - PAD_B;
+  const max = Math.max(3, Math.ceil(Math.max(...data.map(d => d.hours)) * 4) / 4);
+  const step = max / 4;
+  const slot = (W - PAD_L - PAD_R) / data.length;
+  const barW = Math.min(92, slot * 0.8);
+  const ticks = [0, step, step * 2, step * 3, max];
 
   return (
     <div className="bar-chart-wrap">
-      <svg viewBox={`0 0 ${W} ${H + 30}`} width="100%" height={H + 30}>
-        {/* Y axis line */}
-        <line x1={PAD} y1={0} x2={PAD} y2={H} stroke="#e2e8f0" strokeWidth={1} />
-        <line x1={PAD} y1={H} x2={W - PAD} y2={H} stroke="#e2e8f0" strokeWidth={1} />
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
+        {ticks.map(t => {
+          const y = PAD_T + chartH - (t / max) * chartH;
+          return (
+            <g key={t}>
+              <line x1={PAD_L} y1={y} x2={W - PAD_R} y2={y} stroke="#edf2f7" strokeDasharray="3,4" />
+              <text x={PAD_L - 8} y={y + 4} textAnchor="end" fontSize={11} fill="#555">
+                {formatHours(t)}
+              </text>
+            </g>
+          );
+        })}
+        <line x1={PAD_L} y1={PAD_T} x2={PAD_L} y2={H - PAD_B} stroke="#9ca3af" strokeWidth={1.3} />
+        <line x1={PAD_L} y1={H - PAD_B} x2={W - PAD_R} y2={H - PAD_B} stroke="#9ca3af" strokeWidth={1.3} />
 
         {data.map((d, i) => {
-          const barH = Math.max(2, (d.hours / max) * (H - 20));
-          const x    = PAD + i * ((W - PAD * 2) / data.length) + BAR_GAP / 2;
-          const y    = H - barH;
+          const barH = Math.max(3, (d.hours / max) * chartH);
+          const x = PAD_L + i * slot + (slot - barW) / 2;
+          const y = PAD_T + chartH - barH;
 
           return (
             <g key={d.date}>
               <rect x={x} y={y} width={barW} height={barH}
-                fill={color} rx={3} opacity={0.85} />
-              {/* Value label on hover via title */}
+                fill={color} rx={6} />
               <title>{d.date}: {d.hours}h</title>
-              {/* X axis label — show every nth */}
-              {(i % Math.ceil(data.length / 7) === 0) && (
-                <text x={x + barW / 2} y={H + 16}
-                  textAnchor="middle" fontSize={9} fill="#94a3b8">
-                  {d.date.slice(5)} {/* MM-DD */}
-                </text>
-              )}
+              <text x={x + barW / 2} y={H - 10}
+                textAnchor="middle" fontSize={11} fill="#555">
+                {formatShortDate(d.date)}
+              </text>
             </g>
           );
         })}
-
-        {/* Max label */}
-        <text x={PAD - 4} y={12} textAnchor="end" fontSize={9} fill="#94a3b8">
-          {max.toFixed(1)}h
-        </text>
       </svg>
     </div>
   );
 }
 
-// ── SVG Pie / Donut Chart ──────────────────────────────────────────
+// ── SVG Pie Chart ──────────────────────────────────────────
 function PieChart({ data }) {
   if (!data || data.length === 0) return <p className="no-data">No subjects logged yet.</p>;
 
   const total = data.reduce((s, d) => s + d.minutes, 0);
-  const R = 60, CX = 80, CY = 80;
+  const R = 66, CX = 150, CY = 98;
   let angle = -Math.PI / 2;
 
   const slices = data.map((d, i) => {
@@ -102,42 +122,36 @@ function PieChart({ data }) {
     const large = pct > 0.5 ? 1 : 0;
     const x1 = CX + R * Math.cos(start), y1 = CY + R * Math.sin(start);
     const x2 = CX + R * Math.cos(end),   y2 = CY + R * Math.sin(end);
+    const mid = (start + end) / 2;
+    const labelX = CX + (R + 48) * Math.cos(mid);
+    const labelY = CY + (R + 26) * Math.sin(mid);
     return {
       path: `M${CX},${CY} L${x1},${y1} A${R},${R},0,${large},1,${x2},${y2} Z`,
-      color: SUBJECT_COLORS[i % SUBJECT_COLORS.length],
+      color: SUBJECT_COLORS[d.name] || SUBJECT_FALLBACK_COLORS[i % SUBJECT_FALLBACK_COLORS.length],
       name:  d.name,
       hours: d.hours,
       pct:   Math.round(pct * 100),
+      labelX,
+      labelY,
+      anchor: labelX < CX ? 'end' : 'start',
     };
   });
 
   return (
-    <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-      <svg viewBox="0 0 160 160" width={140} height={140} style={{ flexShrink: 0 }}>
+    <div className="pie-chart-wrap">
+      <svg viewBox="0 0 300 210" width="100%" height="210" role="img" aria-label="Subject breakdown pie chart">
         {slices.map((s, i) => (
-          <path key={i} d={s.path} fill={s.color} opacity={0.9}>
+          <path key={i} d={s.path} fill={s.color} stroke="#ffffff" strokeWidth="1.5">
             <title>{s.name}: {s.hours}h ({s.pct}%)</title>
           </path>
         ))}
-        {/* Centre hole */}
-        <circle cx={CX} cy={CY} r={30} fill="white" />
-        <text x={CX} y={CY - 4} textAnchor="middle" fontSize={10} fontWeight="700" fill="#1e293b">
-          {(total / 60).toFixed(1)}h
-        </text>
-        <text x={CX} y={CY + 10} textAnchor="middle" fontSize={8} fill="#94a3b8">total</text>
-      </svg>
-
-      <div className="pie-legend">
         {slices.map((s, i) => (
-          <div key={i} className="pie-legend-item">
-            <span className="pie-legend-dot" style={{ background: s.color }} />
-            <span style={{ color: '#475569', fontWeight: 600 }}>{s.name}</span>
-            <span style={{ color: '#94a3b8', marginLeft: 'auto', paddingLeft: 8 }}>
-              {s.hours}h
-            </span>
-          </div>
+          <text key={`${s.name}-${i}`} x={s.labelX} y={s.labelY}
+            textAnchor={s.anchor} fontSize="14" fill={s.color}>
+            {s.name} {s.pct}%
+          </text>
         ))}
-      </div>
+      </svg>
     </div>
   );
 }
@@ -146,40 +160,44 @@ function PieChart({ data }) {
 function LineChart({ data }) {
   if (!data || data.length === 0) return <p className="no-data">No quiz data yet.</p>;
 
-  const W = 600, H = 120, PAD = 40;
+  const W = 620, H = 190, PAD_L = 54, PAD_R = 20, PAD_T = 12, PAD_B = 30;
+  const chartH = H - PAD_T - PAD_B;
   const max = 100; // percentage axis
   const pts = data.map((d, i) => ({
-    x: PAD + (i / Math.max(data.length - 1, 1)) * (W - PAD * 2),
-    y: H - (d.score / max) * (H - 20),
+    x: PAD_L + (i / Math.max(data.length - 1, 1)) * (W - PAD_L - PAD_R),
+    y: PAD_T + chartH - (d.score / max) * chartH,
     ...d,
   }));
 
   const polyline = pts.map(p => `${p.x},${p.y}`).join(' ');
+  const ticks = [0, 25, 50, 75, 100];
 
   return (
-    <svg viewBox={`0 0 ${W} ${H + 24}`} width="100%" height={H + 24}>
-      <line x1={PAD} y1={H} x2={W - PAD} y2={H} stroke="#e2e8f0" strokeWidth={1} />
-      <line x1={PAD} y1={0} x2={PAD}     y2={H} stroke="#e2e8f0" strokeWidth={1} />
-
-      {/* 50% reference line */}
-      <line x1={PAD} y1={H / 2} x2={W - PAD} y2={H / 2}
-        stroke="#e2e8f0" strokeWidth={1} strokeDasharray="4,4" />
-      <text x={PAD - 4} y={H / 2 + 4} textAnchor="end" fontSize={9} fill="#94a3b8">50%</text>
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
+      {ticks.map(t => {
+        const y = PAD_T + chartH - (t / max) * chartH;
+        return (
+          <g key={t}>
+            <line x1={PAD_L} y1={y} x2={W - PAD_R} y2={y} stroke="#edf2f7" strokeDasharray="3,4" />
+            <text x={PAD_L - 8} y={y + 4} textAnchor="end" fontSize={11} fill="#555">{t}%</text>
+          </g>
+        );
+      })}
+      <line x1={PAD_L} y1={PAD_T} x2={PAD_L} y2={H - PAD_B} stroke="#9ca3af" strokeWidth={1.3} />
+      <line x1={PAD_L} y1={H - PAD_B} x2={W - PAD_R} y2={H - PAD_B} stroke="#9ca3af" strokeWidth={1.3} />
 
       {pts.length > 1 && (
         <polyline points={polyline} fill="none"
-          stroke="#6366f1" strokeWidth={2.5} strokeLinejoin="round" />
+          stroke="#22c55e" strokeWidth={2.5} strokeLinejoin="round" />
       )}
 
       {pts.map((p, i) => (
         <g key={i}>
-          <circle cx={p.x} cy={p.y} r={4} fill="#6366f1" />
+          <circle cx={p.x} cy={p.y} r={5} fill="#22c55e" />
           <title>{p.date}: {p.score}%</title>
-          {(i % Math.ceil(pts.length / 6) === 0) && (
-            <text x={p.x} y={H + 16} textAnchor="middle" fontSize={9} fill="#94a3b8">
-              {p.date.slice(5)}
-            </text>
-          )}
+          <text x={p.x} y={H - 10} textAnchor="middle" fontSize={11} fill="#555">
+            {formatShortDate(p.date)}
+          </text>
         </g>
       ))}
     </svg>
@@ -188,11 +206,8 @@ function LineChart({ data }) {
 
 // ── Main Component ─────────────────────────────────────────────────
 export default function AnalyticsPage() {
-  const navigate = useNavigate();
-
   // Dashboard data
   const [summary, setSummary]       = useState(null);
-  const [sessions, setSessions]     = useState([]);
   const [period, setPeriod]         = useState('week');
   const [loading, setLoading]       = useState(true);
 
@@ -217,12 +232,8 @@ export default function AnalyticsPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [sumRes, sessRes] = await Promise.all([
-        axios.get(`${API}/summary?period=${period}`),
-        axios.get(API),
-      ]);
+      const sumRes = await axios.get(`${API}/summary?period=${period}`);
       setSummary(sumRes.data);
-      setSessions(sessRes.data.slice(0, 20)); // show last 20
     } catch (err) {
       console.error('Analytics fetch error:', err.message);
     }
@@ -255,18 +266,10 @@ export default function AnalyticsPage() {
     setSaving(false);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this session?')) return;
-    await axios.delete(`${API}/${id}`);
-    fetchData();
-  };
-
   const handleSeed = async () => {
     await axios.post(`${API}/seed`);
     fetchData();
   };
-
-  const f = v => v; // passthrough helper for readability
 
   return (
     <div className="page analytics-page">
@@ -275,14 +278,11 @@ export default function AnalyticsPage() {
       <div className="page-header">
         <h2>📊 Study Analytics</h2>
         <div className="analytics-header-actions">
-          <button className="btn-secondary" onClick={() => navigate('/student')}>
-            ← Dashboard
-          </button>
           <button className="btn-secondary" onClick={() => setShowForm(v => !v)}>
             {showForm ? '✕ Cancel' : '➕ Log Session'}
           </button>
-          <button className="btn-secondary" onClick={handleSeed} title="Seed 30 days of sample data">
-            🌱 Seed Data
+          <button className="btn-primary" onClick={() => window.print()}>
+            📄 Export PDF
           </button>
         </div>
       </div>
@@ -379,7 +379,8 @@ export default function AnalyticsPage() {
       ) : !summary ? (
         <div className="rec-empty">
           <span>📊</span>
-          <p>No data yet. Log a session or click 🌱 Seed Data to populate sample data.</p>
+          <p>No data yet. Log a session or seed sample analytics data.</p>
+          <button className="btn-primary" onClick={handleSeed}>Seed Data</button>
         </div>
       ) : (
         <div className="dashboard">
@@ -389,8 +390,8 @@ export default function AnalyticsPage() {
             <div className="stat-card blue">
               <span className="stat-icon">⏱</span>
               <div>
-                <div className="stat-value">{summary.totalHours}h</div>
-                <div className="stat-label">Hours Studied</div>
+                <div className="stat-value">{formatHours(summary.totalHours)}h</div>
+                <div className="stat-label">Total Studied</div>
               </div>
             </div>
             <div className="stat-card green">
@@ -411,11 +412,11 @@ export default function AnalyticsPage() {
               <span className="stat-icon">🃏</span>
               <div>
                 <div className="stat-value">{summary.flashcardRetention}%</div>
-                <div className="stat-label">Flashcard Retention</div>
+                <div className="stat-label">Card Retention</div>
               </div>
             </div>
             <div className="stat-card teal">
-              <span className="stat-icon">📅</span>
+              <span className="stat-icon">📝</span>
               <div>
                 <div className="stat-value">{summary.totalSessions}</div>
                 <div className="stat-label">Sessions</div>
@@ -426,11 +427,11 @@ export default function AnalyticsPage() {
           {/* ── Daily Hours Bar + Subject Pie ── */}
           <div className="charts-row">
             <div className="chart-card">
-              <h4>📅 Daily Study Hours</h4>
+              <h4>🗓️ Hours Studied per Day</h4>
               <BarChart data={summary.dailyHours} />
             </div>
             <div className="chart-card">
-              <h4>📚 By Subject</h4>
+              <h4>📚 Subject Breakdown</h4>
               <PieChart data={summary.subjectBreakdown} />
             </div>
           </div>
@@ -438,7 +439,7 @@ export default function AnalyticsPage() {
           {/* ── Quiz Trend + Flashcard Retention ── */}
           <div className="charts-row">
             <div className="chart-card">
-              <h4>📝 Quiz Score Trend</h4>
+              <h4>📝 Quiz Performance Trend</h4>
               <LineChart data={summary.quizTrend} />
             </div>
             <div className="chart-card">
@@ -448,7 +449,7 @@ export default function AnalyticsPage() {
                   style={{ background: `conic-gradient(#6366f1 ${summary.flashcardRetention * 3.6}deg, #e2e8f0 0deg)` }}>
                   <div className="retention-inner">
                     <span className="retention-pct">{summary.flashcardRetention}%</span>
-                    <span className="retention-lbl">RETENTION</span>
+                    <span className="retention-lbl">Retention</span>
                   </div>
                 </div>
                 <div className="retention-stats">
@@ -466,17 +467,6 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* ── Goal Rate Bar ── */}
-          <div className="chart-card">
-            <h4>🎯 Goal Completion — {summary.goalsCompleted} of {summary.totalDays} days</h4>
-            <div className="goal-bar-wrap">
-              <div className="goal-bar-bg">
-                <div className="goal-bar-fill" style={{ width: `${summary.goalRate}%` }} />
-              </div>
-              <span className="goal-bar-label">{summary.goalRate}% of study days had goals completed</span>
             </div>
           </div>
 
@@ -501,28 +491,15 @@ export default function AnalyticsPage() {
             </div>
           )}
 
-          {/* ── Recent Sessions Log ── */}
-          <div className="chart-card full-width">
-            <h4>📋 Recent Sessions</h4>
-            {sessions.length === 0 ? (
-              <p className="no-data">No sessions logged yet.</p>
-            ) : (
-              <div className="session-list">
-                {sessions.map(s => (
-                  <div key={s._id} className="session-row">
-                    <span className="session-date">
-                      {new Date(s.date).toLocaleDateString()}
-                    </span>
-                    <span className="session-subject">{s.subject}</span>
-                    <span className="session-mins">{s.minutesStudied} min</span>
-                    <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{s.sessionType}</span>
-                    {s.goalCompleted && <span title="Goal completed">✅</span>}
-                    <button className="session-delete" onClick={() => handleDelete(s._id)}
-                      title="Delete session">🗑</button>
-                  </div>
-                ))}
+          {/* ── Goal Rate Bar ── */}
+          <div className="chart-card">
+            <h4>🎯 Goal Completion</h4>
+            <div className="goal-bar-wrap">
+              <div className="goal-bar-bg">
+                <div className="goal-bar-fill" style={{ width: `${summary.goalRate}%` }} />
               </div>
-            )}
+              <span className="goal-bar-label">{summary.goalRate}% — {summary.goalsCompleted} of {summary.totalDays} sessions</span>
+            </div>
           </div>
 
         </div>

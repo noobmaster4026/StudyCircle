@@ -221,6 +221,54 @@
   color: #6b7280;
 }
 
+.sd-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.sd-feature-card {
+  border: none;
+  border-radius: 0.9rem;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  padding: 1rem 1.1rem;
+  text-align: left;
+  cursor: pointer;
+  color: #111827;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-height: 130px;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.sd-feature-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
+}
+
+.sd-feature-card strong {
+  font-size: 1rem;
+}
+
+.sd-feature-card span:last-child {
+  color: #6b7280;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.sd-feature-label {
+  width: fit-content;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .sd-course-columns {
   display: flex;
   gap: 1.25rem;
@@ -374,5 +422,9 @@
 
   .sd-course-columns {
     flex-direction: column;
+  }
+
+  .sd-feature-grid {
+    grid-template-columns: 1fr;
   }
 }

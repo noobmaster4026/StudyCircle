@@ -10,6 +10,7 @@ const studySessionRoutes = require('./routes/studySessionRoutes');
 const tutorRoutes = require('./routes/tutorRoutes');
 const ratingRoutes = require('./routes/ratingRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const studyScheduleRoutes = require('./routes/studyScheduleRoutes');
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use('/api/study-sessions', studySessionRoutes);
 app.use('/api/tutors', tutorRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/study-schedules', studyScheduleRoutes);
 
 // Health check
 app.get('/', (req, res) => res.json({ status: 'StudyCircle API running' }));
