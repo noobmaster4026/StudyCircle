@@ -6,6 +6,10 @@ const {
   getHistory,
   getQuizById,
 } = require('../controller/quizController');
+const { registerUser } = require('../controller/userController');
+
+// POST /api/register           — create a new account
+router.post('/register', registerUser);
 
 // POST /api/quiz/generate        — AI quiz generation
 router.post('/generate', generateQuiz);

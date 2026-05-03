@@ -31,7 +31,10 @@ function Register() {
         body: JSON.stringify(data),
       });
 
-      const result = await response.json();
+      const contentType = response.headers.get("content-type") || "";
+      const result = contentType.includes("application/json")
+        ? await response.json()
+        : { message: await response.text() };
 
       if (response.ok) {
         localStorage.setItem("userName", data.name);

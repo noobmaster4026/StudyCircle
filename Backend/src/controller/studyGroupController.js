@@ -1,12 +1,20 @@
-const { randomUUID } = require('crypto'); // ✅ FIX: built-in Node.js, no ESM issue
-const StudyGroup = require('../models/StudyGroup');
+const { randomUUID } = require('crypto');
+const StudyGroup      = require('../models/StudyGroup');
 const StudyPreference = require('../models/StudyPreference');
+
+/* ══════════════════════════════════════════════════════════════
+   CONSTANTS
+══════════════════════════════════════════════════════════════ */
+
+// Change 3: max 10 members per group
+const MAX_GROUP_SIZE  = 10;
+// Ideal size for newly auto-formed groups (still 4 for quality matching)
+const TARGET_GROUP_SIZE = 4;
 
 /* ══════════════════════════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════════════════════════ */
 
-// Generate a short random ID (replaces nanoid)
 function shortId(length = 8) {
   return randomUUID().replace(/-/g, '').slice(0, length);
 }
@@ -27,16 +35,72 @@ function getCourseTitle(courseCode) {
 
 function generateGroupName(course) {
   const adjectives = ['Focused', 'Brilliant', 'Dynamic', 'Synced', 'Sharp', 'Curious', 'Elite'];
-  const nouns = ['Squad', 'Crew', 'Circle', 'Collective', 'Team', 'Pod'];
-  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const nouns      = ['Squad', 'Crew', 'Circle', 'Collective', 'Team', 'Pod'];
+  const adj  = adjectives[Math.floor(Math.random() * adjectives.length)];
   const noun = nouns[Math.floor(Math.random() * nouns.length)];
   return `${course} ${adj} ${noun}`;
 }
 
-// ✅ FIX: get userId from request — this project has no JWT middleware,
-//         userId is stored in localStorage and sent as a query param or in body
 function getUserId(req) {
   return req.query.userId || req.body.userId || null;
+}
+
+
+async function autoPlaceStudent({ userId, name, email, enrolledCourses }) {
+  if (!enrolledCourses || enrolledCourses.length === 0) return null;
+
+  // Check if student is already in any group — don't double-place them
+  const existing = await StudyGroup.findOne({
+    'members.userId': userId,
+    status: { $in: ['forming', 'active'] },
+  });
+  if (existing) return existing; // already placed, nothing to do
+
+  const memberEntry = { userId, name: name || 'Student', email: email || '' };
+
+  for (const course of enrolledCourses) {
+    // Change 4: find groups for this course that still have room
+    // sorted by members count descending so we fill existing groups first
+    // before spilling into new ones
+    const availableGroups = await StudyGroup.find({
+      course,
+      status:  { $in: ['forming', 'active'] },
+      // members array length < MAX_GROUP_SIZE
+      $expr: { $lt: [{ $size: '$members' }, MAX_GROUP_SIZE] },
+    }).sort({ 'members': -1 }); // most populated first → fills up groups efficiently
+
+    if (availableGroups.length > 0) {
+      // Place in the first available group for this course
+      const group = availableGroups[0];
+      group.members.push(memberEntry);
+      if (group.members.length >= 2) group.status = 'active';
+      await group.save();
+      return group;
+    }
+
+    // No available group for this course — create a fresh one
+    // (change 4: this is the "different group" when all existing ones are full)
+    const wbRoomId      = `wb-${course.toLowerCase()}-${shortId(8)}`;
+    const meetingRoomId = `meet-${shortId(10)}`;
+
+    const newGroup = new StudyGroup({
+      name:             generateGroupName(course),
+      course,
+      courseTitle:      getCourseTitle(course),
+      members:          [{ ...memberEntry, role: 'leader' }],
+      maxSize:          MAX_GROUP_SIZE,
+      status:           'forming',
+      whiteboardRoomId: wbRoomId,
+      meetingRoomId,
+      autoCreated:      true,
+      matchFactors:     { sharedCourses: [course], sharedGoals: [], preferredTimes: [], studyStyle: '' },
+    });
+
+    await newGroup.save();
+    return newGroup;
+  }
+
+  return null;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -46,35 +110,26 @@ function getUserId(req) {
 function computeMatchScore(prefA, prefB) {
   let score = 0;
 
-  // 1. Shared courses — 40 pts max (10 per shared course, up to 4)
   const sharedCourses = (prefA.enrolledCourses || []).filter((c) =>
     (prefB.enrolledCourses || []).includes(c)
   );
   score += Math.min(sharedCourses.length, 4) * 10;
 
-  // 2. Time overlap — 30 pts max (5 per matching slot)
   let timeOverlap = 0;
   for (const dayA of (prefA.availableTimes || [])) {
     const dayB = (prefB.availableTimes || []).find((d) => d.day === dayA.day);
     if (dayB) {
-      const slotOverlap = (dayA.slots || []).filter((s) => (dayB.slots || []).includes(s)).length;
-      timeOverlap += slotOverlap;
+      timeOverlap += (dayA.slots || []).filter((s) => (dayB.slots || []).includes(s)).length;
     }
   }
   score += Math.min(timeOverlap * 5, 30);
 
-  // 3. Study style — 15 pts exact match, 7 partial
-  if (prefA.studyStyle === prefB.studyStyle) {
-    score += 15;
-  } else if (prefA.studyStyle === 'collaborative' || prefB.studyStyle === 'collaborative') {
-    score += 7;
-  }
+  if (prefA.studyStyle === prefB.studyStyle) score += 15;
+  else if (prefA.studyStyle === 'collaborative' || prefB.studyStyle === 'collaborative') score += 7;
 
-  // 4. Shared goals — 10 pts max
   const sharedGoals = (prefA.goals || []).filter((g) => (prefB.goals || []).includes(g));
   score += Math.min(sharedGoals.length * 5, 10);
 
-  // 5. Shared language — 5 pts
   const langA = prefA.languages?.length ? prefA.languages : ['English'];
   const langB = prefB.languages?.length ? prefB.languages : ['English'];
   if (langA.some((l) => langB.includes(l))) score += 5;
@@ -84,28 +139,46 @@ function computeMatchScore(prefA, prefB) {
 
 /* ══════════════════════════════════════════════════════════════
    GROUP FORMATION ENGINE
+   Called by the manual "Run Matching" button / cron job.
+   Still useful for bulk re-matching all unplaced students.
 ══════════════════════════════════════════════════════════════ */
-const TARGET_GROUP_SIZE = 4;
-const MIN_GROUP_SIZE = 2;
-
 async function runAutomaticGroupFormation() {
+  // Change 1: removed the MIN_GROUP_SIZE guard entirely.
+  // Even a single opted-in student gets auto-placed via autoPlaceStudent.
   const prefs = await StudyPreference.find({ optIn: true });
-  if (prefs.length < MIN_GROUP_SIZE) {
-    return { formed: 0, message: 'Not enough opted-in students.' };
+
+  if (prefs.length === 0) {
+    return { formed: 0, message: 'No opted-in students found. Save your preferences first.' };
   }
 
-  // Find students already in active/forming groups
+  // Find students not yet in any active/forming group
   const existingGroups = await StudyGroup.find({ status: { $in: ['forming', 'active'] } });
   const alreadyGrouped = new Set(
     existingGroups.flatMap((g) => g.members.map((m) => m.userId.toString()))
   );
 
   const unmatched = prefs.filter((p) => !alreadyGrouped.has(p.userId.toString()));
-  if (unmatched.length < MIN_GROUP_SIZE) {
+
+  if (unmatched.length === 0) {
     return { formed: 0, message: 'All opted-in students are already in groups.' };
   }
 
-  // Build score matrix
+  // Change 1: a single unmatched student still gets placed (no MIN check)
+  // For single students, autoPlaceStudent handles it directly
+  if (unmatched.length === 1) {
+    const p = unmatched[0];
+    const placed = await autoPlaceStudent({
+      userId: p.userId,
+      name:   p.name,
+      email:  p.email,
+      enrolledCourses: p.enrolledCourses,
+    });
+    return placed
+      ? { formed: 1, message: `${p.name} was placed into a group.` }
+      : { formed: 0, message: 'Could not place student — no courses selected.' };
+  }
+
+  // Build score matrix for 2+ students
   const n = unmatched.length;
   const scores = {};
   for (let i = 0; i < n; i++) {
@@ -123,13 +196,11 @@ async function runAutomaticGroupFormation() {
     }
   }
 
-  const grouped = new Set();
+  const grouped  = new Set();
   const formedGroups = [];
 
   for (const [course, indices] of courseMap) {
-    if (indices.length < MIN_GROUP_SIZE) continue;
-
-    // Sort pairs by score descending
+    // Change 1: no minimum size check — even a cluster of 1 gets placed
     const pairs = [];
     for (let a = 0; a < indices.length; a++) {
       for (let b = a + 1; b < indices.length; b++) {
@@ -144,21 +215,24 @@ async function runAutomaticGroupFormation() {
     const used = new Set();
 
     for (const pair of pairs) {
-      if (currentGroup.length >= TARGET_GROUP_SIZE) {
-        if (currentGroup.length >= MIN_GROUP_SIZE) {
-          formedGroups.push({ course, members: [...currentGroup] });
-          currentGroup.forEach((idx) => grouped.add(idx));
-        }
+      // Change 3: cap at MAX_GROUP_SIZE instead of old TARGET_GROUP_SIZE
+      if (currentGroup.length >= MAX_GROUP_SIZE) {
+        // Flush this group — it's full
+        formedGroups.push({ course, members: [...currentGroup] });
+        currentGroup.forEach((idx) => grouped.add(idx));
         currentGroup = [];
         used.clear();
       }
-      if (!grouped.has(pair.i) && !used.has(pair.i)) { currentGroup.push(pair.i); used.add(pair.i); }
-      if (!grouped.has(pair.j) && !used.has(pair.j) && currentGroup.length < TARGET_GROUP_SIZE) {
+      if (!grouped.has(pair.i) && !used.has(pair.i)) {
+        currentGroup.push(pair.i); used.add(pair.i);
+      }
+      if (!grouped.has(pair.j) && !used.has(pair.j) && currentGroup.length < MAX_GROUP_SIZE) {
         currentGroup.push(pair.j); used.add(pair.j);
       }
     }
 
-    if (currentGroup.length >= MIN_GROUP_SIZE) {
+    // Flush remaining (even a single student — change 1)
+    if (currentGroup.length > 0) {
       formedGroups.push({ course, members: [...currentGroup] });
       currentGroup.forEach((idx) => grouped.add(idx));
     }
@@ -168,10 +242,9 @@ async function runAutomaticGroupFormation() {
   const created = [];
   for (const g of formedGroups) {
     const memberPrefs = g.members.map((idx) => unmatched[idx]);
-    const leaderPref = memberPrefs.find((p) => p.willingToLead) || memberPrefs[0];
+    const leaderPref  = memberPrefs.find((p) => p.willingToLead) || memberPrefs[0];
 
-    // ✅ FIX: shortId() replaces nanoid()
-    const wbRoomId     = `wb-${g.course.toLowerCase()}-${shortId(8)}`;
+    const wbRoomId      = `wb-${g.course.toLowerCase()}-${shortId(8)}`;
     const meetingRoomId = `meet-${shortId(10)}`;
 
     const group = new StudyGroup({
@@ -184,14 +257,15 @@ async function runAutomaticGroupFormation() {
         email:  p.email,
         role:   p.userId.toString() === leaderPref.userId.toString() ? 'leader' : 'member',
       })),
-      maxSize:      TARGET_GROUP_SIZE + 1,
-      status:       'forming',
+      // Change 3: maxSize is now MAX_GROUP_SIZE (10)
+      maxSize:          MAX_GROUP_SIZE,
+      status:           memberPrefs.length >= 2 ? 'active' : 'forming',
       whiteboardRoomId: wbRoomId,
       meetingRoomId,
-      autoCreated: true,
+      autoCreated:      true,
       matchFactors: {
-        sharedCourses: [g.course],
-        sharedGoals:   memberPrefs[0].goals || [],
+        sharedCourses:  [g.course],
+        sharedGoals:    memberPrefs[0].goals || [],
         preferredTimes: (memberPrefs[0].availableTimes || []).map(
           (t) => `${t.day}: ${(t.slots || []).join(', ')}`
         ),
@@ -208,10 +282,9 @@ async function runAutomaticGroupFormation() {
 
 /* ══════════════════════════════════════════════════════════════
    ROUTE CONTROLLERS
-   ✅ FIX: all use getUserId(req) instead of req.user._id
 ══════════════════════════════════════════════════════════════ */
 
-// GET /api/study-groups?userId=xxx — my groups
+// GET /api/study-groups?userId=xxx
 const getStudyGroups = async (req, res) => {
   try {
     const userId = getUserId(req);
@@ -228,7 +301,7 @@ const getStudyGroups = async (req, res) => {
   }
 };
 
-// GET /api/study-groups/available?userId=xxx — groups I can join
+// GET /api/study-groups/available?userId=xxx
 const getAvailableGroups = async (req, res) => {
   try {
     const userId = getUserId(req);
@@ -239,9 +312,10 @@ const getAvailableGroups = async (req, res) => {
 
     const groups = await StudyGroup.find({
       'members.userId': { $ne: userId },
-      course: { $in: userPref.enrolledCourses },
-      status: 'forming',
-      $expr: { $lt: [{ $size: '$members' }, '$maxSize'] },
+      course:  { $in: userPref.enrolledCourses },
+      status:  'forming',
+      // Change 3: respect MAX_GROUP_SIZE in available query too
+      $expr: { $lt: [{ $size: '$members' }, MAX_GROUP_SIZE] },
     }).limit(20);
 
     res.json({ success: true, groups });
@@ -279,18 +353,17 @@ const joinGroup = async (req, res) => {
 
     const group = await StudyGroup.findById(req.params.id);
     if (!group) return res.status(404).json({ success: false, message: 'Group not found' });
-    if (group.isFull) return res.status(400).json({ success: false, message: 'Group is full' });
+
+    // Change 3: check against MAX_GROUP_SIZE
+    if (group.members.length >= MAX_GROUP_SIZE) {
+      return res.status(400).json({ success: false, message: 'Group is full (max 10 members)' });
+    }
 
     const already = group.members.find((m) => m.userId.toString() === userId);
     if (already) return res.status(400).json({ success: false, message: 'Already a member' });
 
-    group.members.push({
-      userId,
-      name:  req.body.name  || 'Student',
-      email: req.body.email || '',
-    });
-
-    if (group.members.length >= MIN_GROUP_SIZE + 1) group.status = 'active';
+    group.members.push({ userId, name: req.body.name || 'Student', email: req.body.email || '' });
+    if (group.members.length >= 2) group.status = 'active';
     await group.save();
 
     res.json({ success: true, group });
@@ -309,7 +382,7 @@ const leaveGroup = async (req, res) => {
     if (!group) return res.status(404).json({ success: false, message: 'Group not found' });
 
     group.members = group.members.filter((m) => m.userId.toString() !== userId);
-    if (group.members.length < MIN_GROUP_SIZE) group.status = 'forming';
+    if (group.members.length < 2)  group.status = 'forming';
     if (group.members.length === 0) group.status = 'dissolved';
     await group.save();
 
@@ -333,6 +406,7 @@ const getMyPreferences = async (req, res) => {
 };
 
 // PATCH /api/study-groups/my-preferences   body: { userId, name, email, ...prefFields }
+// Change 2: after saving preferences, auto-place the student into a group
 const updateMyPreferences = async (req, res) => {
   try {
     const userId = getUserId(req);
@@ -340,13 +414,41 @@ const updateMyPreferences = async (req, res) => {
 
     const { name, email, ...prefData } = req.body;
 
+    // Save / upsert the preferences
     const pref = await StudyPreference.findOneAndUpdate(
       { userId },
-      { ...prefData, userId, name: name || 'Student', email: email || '', lastUpdated: new Date() },
+      {
+        ...prefData,
+        userId,
+        name:        name  || 'Student',
+        email:       email || '',
+        lastUpdated: new Date(),
+      },
       { upsert: true, new: true }
     );
 
-    res.json({ success: true, preferences: pref });
+    // Change 2: immediately place the student into the best available group
+    // for one of their enrolled courses (or create one if none exist).
+    // This runs even if only 1 student has signed up — change 1 removes the
+    // minimum 2-student requirement.
+    let placedGroup = null;
+    if (pref.optIn !== false && pref.enrolledCourses?.length > 0) {
+      placedGroup = await autoPlaceStudent({
+        userId,
+        name:            pref.name,
+        email:           pref.email,
+        enrolledCourses: pref.enrolledCourses,
+      });
+    }
+
+    res.json({
+      success: true,
+      preferences: pref,
+      // Tell the frontend whether a group placement happened
+      placedInGroup: placedGroup
+        ? { id: placedGroup._id, name: placedGroup.name, course: placedGroup.course }
+        : null,
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
