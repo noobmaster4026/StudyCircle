@@ -16,6 +16,9 @@ const courseRoutes = require("./src/routes/courseRoutes");
 const userCourseRoutes = require("./src/routes/userCourseRoutes");
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const startReminderService = require('./src/utils/reminderService');
+const doubtSolverRoutes = require('./src/routes/doubtSolverRoutes');
+const studyStreakRoutes = require('./src/routes/studyStreakRoutes');
+const resourceBookmarkRoutes = require('./src/routes/resourceBookmarkRoutes');
 
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
@@ -37,6 +40,9 @@ app.use('/api/documents', documentRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/doubt-solver', doubtSolverRoutes);
+app.use('/api/study-streaks', studyStreakRoutes);
+app.use('/api/resource-bookmarks', resourceBookmarkRoutes);
 
 // Route Registration
 app.use('/api/recommendations', recommendationRoutes);

@@ -185,6 +185,30 @@ function StudentDashboard() {
       action: () => navigate("/reminders"),
       btnText: "Set Reminders",
     },
+    {
+      num: "17. DOUBT SOLVER",
+      title: "Ask AI",
+      desc: "Ask a study question, add subject context, and get a clear explanation with a quick practice prompt.",
+      img: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/doubt-solver"),
+      btnText: "Solve Doubts",
+    },
+    {
+      num: "18. STUDY STREAK",
+      title: "Build Momentum",
+      desc: "Check in after studying, track your current and longest streaks, and unlock achievement badges.",
+      img: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/study-streak"),
+      btnText: "View Streak",
+    },
+    {
+      num: "19. BOOKMARKS",
+      title: "Save Resources",
+      desc: "Organize links, videos, docs, and references by category, subject, tags, and favorites.",
+      img: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/bookmarks"),
+      btnText: "Open Bookmarks",
+    },
   ];
 
   return (

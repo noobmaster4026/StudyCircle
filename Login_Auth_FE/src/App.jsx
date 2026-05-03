@@ -22,6 +22,9 @@ import ParticleBackground from "./components/ParticleBackground";
 import AnalyticsPage from './pages/AnalyticsPage';
 import {
   PeerRatingsPage,
+  ResourceBookmarksPage,
+  StudyStreakPage,
+  DoubtSolverPage,
   StudyRemindersPage,
   StudySessionsPage,
   TutorMarketplacePage,
@@ -78,6 +81,9 @@ function App() {
         <Route path="/tutor-marketplace" element={<TutorMarketplacePage />} />
         <Route path="/peer-ratings" element={<PeerRatingsPage />} />
         <Route path="/reminders" element={<StudyRemindersPage />} />
+        <Route path="/doubt-solver" element={<DoubtSolverPage />} />
+        <Route path="/study-streak" element={<StudyStreakPage />} />
+        <Route path="/bookmarks" element={<ResourceBookmarksPage />} />
       </Routes>
     </BrowserRouter>
   );

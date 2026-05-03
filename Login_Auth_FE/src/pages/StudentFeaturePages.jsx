@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./StudentFeaturePages.css";
 
@@ -42,6 +42,270 @@ function PageShell({ title, desc, pill, children }) {
         {children}
       </main>
     </div>
+  );
+}
+
+const API_BASE = "http://localhost:3001/api";
+
+function getUserId() {
+  return localStorage.getItem("userId") || "guest";
+}
+
+export function DoubtSolverPage() {
+  const [messages, setMessages] = useStoredList(`doubtSolverMessages:${getUserId()}`, []);
+  const [form, setForm] = useState({ subject: "", question: "", context: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const askQuestion = async () => {
+    if (!form.question.trim()) return;
+
+    const userMessage = {
+      id: `q-${Date.now()}`,
+      role: "student",
+      text: form.question.trim(),
+      subject: form.subject.trim() || "General",
+    };
+
+    setMessages([userMessage, ...messages]);
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch(`${API_BASE}/doubt-solver/ask`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Unable to solve this doubt.");
+
+      const answerMessage = {
+        id: `a-${Date.now()}`,
+        role: "ai",
+        text: data.answer,
+        subject: userMessage.subject,
+      };
+      setMessages([answerMessage, userMessage, ...messages]);
+      setForm({ subject: form.subject, question: "", context: "" });
+    } catch (err) {
+      setError(err.message);
+      setMessages([userMessage, ...messages]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <PageShell title="AI Doubt Solver Chatbot" desc="Ask study questions and get step-by-step explanations with a quick practice prompt." pill={loading ? "Thinking" : `${messages.length} messages`}>
+      <div className="feature-grid">
+        <section className="feature-card">
+          <h2>Ask a doubt</h2>
+          <label className="feature-field">Subject<input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} placeholder="Algorithms, calculus, biology..." /></label>
+          <label className="feature-field">Question<textarea rows="5" value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} placeholder="What are you stuck on?" /></label>
+          <label className="feature-field">Context<textarea rows="3" value={form.context} onChange={(e) => setForm({ ...form, context: e.target.value })} placeholder="Optional notes, attempted solution, or class topic" /></label>
+          <button type="button" className="feature-btn" onClick={askQuestion} disabled={loading}>{loading ? "Solving..." : "Ask AI"}</button>
+          {error && <p className="feature-error">{error}</p>}
+        </section>
+        <section className="feature-card">
+          <h2>Chat history</h2>
+          <div className="feature-list">
+            {messages.length === 0 ? <p className="feature-muted">No doubts asked yet.</p> : messages.map((message) => (
+              <div key={message.id} className={`feature-item ${message.role === "ai" ? "feature-answer" : ""}`}>
+                <strong>{message.role === "ai" ? "AI Tutor" : `You - ${message.subject}`}</strong>
+                <p className="feature-preline">{message.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </PageShell>
+  );
+}
+
+export function StudyStreakPage() {
+  const userId = getUserId();
+  const [streak, setStreak] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchStreak = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`${API_BASE}/study-streaks/${userId}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Unable to load streak.");
+      setStreak(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStreak();
+  }, []);
+
+  const checkIn = async () => {
+    setError("");
+    try {
+      const res = await fetch(`${API_BASE}/study-streaks/${userId}/check-in`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Unable to check in.");
+      setStreak(data);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const today = new Date().toISOString().slice(0, 10);
+  const checkedInToday = streak?.studyDates?.includes(today);
+
+  return (
+    <PageShell title="Study Streak Tracker & Achievement Badges" desc="Check in after studying, protect your streak, and unlock badges as your habits grow." pill={loading ? "Loading" : `${streak?.currentStreak || 0} day streak`}>
+      {error && <p className="feature-error">{error}</p>}
+      <div className="feature-grid">
+        <section className="feature-card">
+          <h2>Today's progress</h2>
+          <div className="streak-number">{streak?.currentStreak || 0}</div>
+          <p className="feature-muted">Current consecutive study days</p>
+          <div className="feature-actions">
+            <button type="button" className="feature-btn" onClick={checkIn} disabled={checkedInToday}>{checkedInToday ? "Checked In Today" : "Check In"}</button>
+            <button type="button" className="feature-btn secondary" onClick={fetchStreak}>Refresh</button>
+          </div>
+        </section>
+        <section className="feature-card">
+          <h2>Stats</h2>
+          <div className="feature-grid three compact-stats">
+            <div className="feature-item"><strong>{streak?.totalDays || 0}</strong><p>Total study days</p></div>
+            <div className="feature-item"><strong>{streak?.longestStreak || 0}</strong><p>Longest streak</p></div>
+            <div className="feature-item"><strong>{streak?.lastCheckIn || "None"}</strong><p>Last check-in</p></div>
+          </div>
+        </section>
+      </div>
+      <section className="feature-card feature-spaced">
+        <h2>Achievement badges</h2>
+        <div className="badge-grid">
+          {(streak?.badges || []).map((badge) => (
+            <div key={badge.id} className={`badge-card ${badge.earned ? "earned" : ""}`}>
+              <strong>{badge.name}</strong>
+              <p>{badge.description}</p>
+              <span>{badge.earned ? "Earned" : "Locked"}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+    </PageShell>
+  );
+}
+
+export function ResourceBookmarksPage() {
+  const userId = getUserId();
+  const [bookmarks, setBookmarks] = useState([]);
+  const [filter, setFilter] = useState("all");
+  const [query, setQuery] = useState("");
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({ title: "", url: "", category: "Article", subject: "", tags: "", notes: "" });
+
+  const fetchBookmarks = async () => {
+    setError("");
+    try {
+      const params = new URLSearchParams({ userId, category: filter, q: query });
+      const res = await fetch(`${API_BASE}/resource-bookmarks?${params.toString()}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Unable to load bookmarks.");
+      setBookmarks(data);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookmarks();
+  }, [filter]);
+
+  const addBookmark = async () => {
+    if (!form.title.trim() || !form.url.trim()) return;
+    setError("");
+    try {
+      const res = await fetch(`${API_BASE}/resource-bookmarks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, userId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Unable to save bookmark.");
+      setBookmarks([data, ...bookmarks]);
+      setForm({ title: "", url: "", category: "Article", subject: "", tags: "", notes: "" });
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const updateBookmark = async (id, updates) => {
+    const res = await fetch(`${API_BASE}/resource-bookmarks/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+    const data = await res.json();
+    if (res.ok) setBookmarks(bookmarks.map((bookmark) => bookmark._id === id ? data : bookmark));
+  };
+
+  const deleteBookmark = async (id) => {
+    const res = await fetch(`${API_BASE}/resource-bookmarks/${id}`, { method: "DELETE" });
+    if (res.ok) setBookmarks(bookmarks.filter((bookmark) => bookmark._id !== id));
+  };
+
+  const categories = ["all", "Article", "Video", "Documentation", "Course", "Tool", "General"];
+
+  return (
+    <PageShell title="Categorized Resource Bookmarks" desc="Save useful resources with categories, subjects, tags, favorites, and notes." pill={`${bookmarks.length} saved`}>
+      {error && <p className="feature-error">{error}</p>}
+      <div className="feature-grid">
+        <section className="feature-card">
+          <h2>Add resource</h2>
+          <label className="feature-field">Title<input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></label>
+          <label className="feature-field">URL<input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} placeholder="https://..." /></label>
+          <label className="feature-field">Category<select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>{categories.filter(c => c !== "all").map(c => <option key={c} value={c}>{c}</option>)}</select></label>
+          <label className="feature-field">Subject<input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} /></label>
+          <label className="feature-field">Tags<input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} placeholder="react, hooks, exam" /></label>
+          <label className="feature-field">Notes<textarea rows="3" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></label>
+          <button type="button" className="feature-btn" onClick={addBookmark}>Save Bookmark</button>
+        </section>
+        <section className="feature-card">
+          <h2>Saved resources</h2>
+          <div className="feature-actions bookmark-toolbar">
+            <select value={filter} onChange={(e) => setFilter(e.target.value)}>{categories.map(c => <option key={c} value={c}>{c === "all" ? "All categories" : c}</option>)}</select>
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search bookmarks" />
+            <button type="button" className="feature-btn secondary" onClick={fetchBookmarks}>Search</button>
+          </div>
+          <div className="feature-list">
+            {bookmarks.length === 0 ? <p className="feature-muted">No bookmarks saved yet.</p> : bookmarks.map((bookmark) => (
+              <div key={bookmark._id} className="feature-item">
+                <div className="bookmark-heading">
+                  <strong>{bookmark.title}</strong>
+                  <button type="button" className="feature-btn secondary" onClick={() => updateBookmark(bookmark._id, { isFavorite: !bookmark.isFavorite })}>{bookmark.isFavorite ? "Favorite" : "Mark Favorite"}</button>
+                </div>
+                <p>{bookmark.category} {bookmark.subject ? `- ${bookmark.subject}` : ""}</p>
+                {bookmark.notes && <p>{bookmark.notes}</p>}
+                {bookmark.tags?.length > 0 && <p>{bookmark.tags.map(tag => `#${tag}`).join(" ")}</p>}
+                <div className="feature-actions">
+                  <a className="feature-link" href={bookmark.url} target="_blank" rel="noreferrer">Open Resource</a>
+                  <button type="button" className="feature-btn danger" onClick={() => deleteBookmark(bookmark._id)}>Delete</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </PageShell>
   );
 }
 
