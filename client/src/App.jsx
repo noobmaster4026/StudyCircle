@@ -7,7 +7,6 @@ import TeacherDashboard from './pages/teacher_dashboard'
 import AdminDashboard from './pages/admin_dashboard'
 import Settings from './pages/settings'
 import StudySession from './pages/studySession'
-import StudySchedule from './pages/studySchedule'
 import TutorMarketplace from './pages/tutorMarketplace'
 import ManageCourse from './pages/manageCourse'
 import ManageBookings from './pages/manageBookings'
@@ -49,7 +48,6 @@ function App() {
         <Route path="/teacher/*" element={<Navigate to="/teacher/manage-course" replace />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/study-session" element={<StudySession />} />
-        <Route path="/study-schedule" element={<StudySchedule />} />
         <Route path="/tutor-marketplace" element={<TutorMarketplace />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>

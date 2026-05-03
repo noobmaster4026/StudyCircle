@@ -23,7 +23,6 @@ import AnalyticsPage from './pages/AnalyticsPage';
 import {
   PeerRatingsPage,
   StudyRemindersPage,
-  StudySchedulePage,
   StudySessionsPage,
   TutorMarketplacePage,
 } from "./pages/StudentFeaturePages";
@@ -76,7 +75,6 @@ function App() {
         <Route path="/whiteboard/:roomId" element={<SharedWhiteboard />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/study-session" element={<StudySessionsPage />} />
-        <Route path="/study-schedule" element={<StudySchedulePage />} />
         <Route path="/tutor-marketplace" element={<TutorMarketplacePage />} />
         <Route path="/peer-ratings" element={<PeerRatingsPage />} />
         <Route path="/reminders" element={<StudyRemindersPage />} />

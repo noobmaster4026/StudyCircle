@@ -183,47 +183,6 @@
   line-height: 1.5;
 }
 
-.schedule-days {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.day-chip {
-  border: 2px solid #e2e8f0;
-  border-radius: 999px;
-  padding: 0.45rem 0.75rem;
-  background: #fff;
-  color: #334155;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.day-chip.active {
-  border-color: #6366f1;
-  background: #6366f1;
-  color: #fff;
-}
-
-.schedule-day {
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #f8fafc;
-  padding: 1rem;
-}
-
-.schedule-block {
-  display: grid;
-  grid-template-columns: 70px 1fr;
-  gap: 0.75rem;
-  padding: 0.65rem 0;
-  border-top: 1px solid #e2e8f0;
-}
-
-.schedule-block:first-of-type {
-  border-top: 0;
-}
-
 @media (max-width: 900px) {
   .feature-grid,
   .feature-grid.three {

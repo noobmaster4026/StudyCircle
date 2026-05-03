@@ -172,15 +172,6 @@ export default function StudentDashboard() {
         <button
           type="button"
           className="sd-feature-card"
-          onClick={() => navigate('/study-schedule')}
-        >
-          <span className="sd-feature-label">AI planner</span>
-          <strong>Study schedule generator</strong>
-          <span>Create a weekly plan from your courses and goals.</span>
-        </button>
-        <button
-          type="button"
-          className="sd-feature-card"
           onClick={() => navigate('/study-session')}
         >
           <span className="sd-feature-label">Peer study</span>

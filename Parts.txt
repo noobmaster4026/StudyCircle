@@ -3,7 +3,6 @@ Parts:
 Raian:
 Course & Subject Selection(1)
 Create/Join Study Sessions 
-AI Study Schedule Generator 
 Tutor Marketplace
 Peer Rating System
 

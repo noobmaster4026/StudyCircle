@@ -2,8 +2,6 @@ import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./StudentFeaturePages.css";
 
-const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
 function useStoredList(key, initialValue) {
   const [items, setItems] = useState(() => {
     try {
@@ -44,108 +42,6 @@ function PageShell({ title, desc, pill, children }) {
         {children}
       </main>
     </div>
-  );
-}
-
-export function StudySchedulePage() {
-  const [days, setDays] = useState(["Sunday", "Tuesday", "Thursday"]);
-  const [subjects, setSubjects] = useState("CSE101, Mathematics, English");
-  const [hours, setHours] = useState(8);
-  const [focus, setFocus] = useState("balanced");
-  const [plan, setPlan] = useStoredList("studySchedulePlan", []);
-
-  const generate = () => {
-    const subjectList = subjects.split(",").map((s) => s.trim()).filter(Boolean);
-    const tasks = focus === "exam"
-      ? ["Past-paper practice", "Timed problem set", "Formula review", "Mock correction"]
-      : focus === "revision"
-        ? ["Active recall", "Notes revision", "Flash review", "Weak topic repair"]
-        : ["Read notes", "Practice problems", "Summarize", "Review"];
-    const totalBlocks = Math.max(1, Math.min(24, Math.round(Number(hours || 8) * 1.5)));
-    const next = Array.from({ length: totalBlocks }, (_, index) => ({
-      day: days[index % days.length],
-      time: `${String(17 + Math.floor((index / days.length) % 4)).padStart(2, "0")}:00`,
-      subject: subjectList[index % subjectList.length] || "General study",
-      task: tasks[index % tasks.length],
-    }));
-    setPlan(next);
-  };
-
-  const grouped = plan.reduce((map, block) => {
-    map[block.day] = [...(map[block.day] || []), block];
-    return map;
-  }, {});
-
-  return (
-    <PageShell
-      title="AI Study Schedule Generator"
-      desc="Create a weekly plan from your subjects, available hours, and current exam focus."
-      pill={`${hours || 0} hrs/week`}
-    >
-      <div className="feature-grid">
-        <section className="feature-card">
-          <h2>Build your plan</h2>
-          <label className="feature-field">
-            Subjects
-            <input value={subjects} onChange={(e) => setSubjects(e.target.value)} />
-          </label>
-          <label className="feature-field">
-            Weekly hours
-            <input type="number" min="1" max="80" value={hours} onChange={(e) => setHours(e.target.value)} />
-          </label>
-          <label className="feature-field">
-            Focus
-            <select value={focus} onChange={(e) => setFocus(e.target.value)}>
-              <option value="balanced">Balanced</option>
-              <option value="exam">Exam prep</option>
-              <option value="revision">Revision</option>
-            </select>
-          </label>
-          <div className="feature-field">
-            Study days
-            <div className="schedule-days">
-              {DAYS.map((day) => (
-                <button
-                  key={day}
-                  type="button"
-                  className={`day-chip ${days.includes(day) ? "active" : ""}`}
-                  onClick={() => setDays((prev) => prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day])}
-                >
-                  {day.slice(0, 3)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <button type="button" className="feature-btn" onClick={generate}>
-            Generate Schedule
-          </button>
-        </section>
-
-        <section className="feature-card">
-          <h2>Weekly schedule</h2>
-          {plan.length === 0 ? (
-            <p className="feature-muted">Generate a plan to see study blocks here.</p>
-          ) : (
-            <div className="feature-list">
-              {Object.entries(grouped).map(([day, blocks]) => (
-                <div key={day} className="schedule-day">
-                  <h3>{day}</h3>
-                  {blocks.map((block, index) => (
-                    <div key={`${day}-${index}`} className="schedule-block">
-                      <strong>{block.time}</strong>
-                      <div>
-                        <strong>{block.subject}</strong>
-                        <p>{block.task} • 45 min</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
-    </PageShell>
   );
 }
 
