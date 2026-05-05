@@ -3,9 +3,12 @@ const axios = require('axios');
 
 const router = express.Router();
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free';
+
+function getOpenRouterApiKey() {
+  return typeof process.env.OPENROUTER_API_KEY === 'string' ? process.env.OPENROUTER_API_KEY.trim() : '';
+}
 
 function buildPrompt(question, subject, context) {
   return `You are StudyCircle's AI doubt solver for students.
@@ -29,7 +32,9 @@ router.post('/ask', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Question is required.' });
   }
 
-  if (!OPENROUTER_API_KEY) {
+  const openRouterApiKey = getOpenRouterApiKey();
+
+  if (!openRouterApiKey) {
     return res.status(500).json({
       success: false,
       message: 'OpenRouter API key is not configured. Add OPENROUTER_API_KEY to Backend/.env to enable the AI doubt solver.',
@@ -47,7 +52,7 @@ router.post('/ask', async (req, res) => {
       },
       {
         headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+          Authorization: `Bearer ${openRouterApiKey}`,
           'Content-Type': 'application/json',
           'HTTP-Referer': 'https://studycircle.app',
           'X-Title': 'StudyCircle AI Doubt Solver',
@@ -59,6 +64,13 @@ router.post('/ask', async (req, res) => {
     const answer = (response.data?.choices?.[0]?.message?.content || '')
       .replace(/<think>[\s\S]*?<\/think>/gi, '')
       .trim();
+
+    if (!answer) {
+      return res.status(502).json({
+        success: false,
+        message: 'The AI service returned an empty answer. Please try asking again.',
+      });
+    }
 
     res.json({ success: true, answer });
   } catch (err) {

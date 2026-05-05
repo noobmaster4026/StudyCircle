@@ -60,7 +60,7 @@ function Login() {
         }
         setServerError(result.message);
       }
-    } catch (error) {
+    } catch {
       setServerError("Could not connect to the server. Is your backend running?");
     }
   };

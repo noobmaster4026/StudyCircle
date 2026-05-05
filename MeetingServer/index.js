@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const path = require("path");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const http = require("http");
@@ -7,7 +8,9 @@ const { Server } = require("socket.io");
 const connectDB = require("./config/db");
 const meetingRoutes = require("./routes/meetingRoutes");
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, ".env") });
+dotenv.config({ path: path.join(__dirname, "..", "Backend", ".env") });
+dotenv.config({ path: path.join(__dirname, "..", "server", ".env") });
 connectDB();
 
 const app = express();
@@ -99,7 +102,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.MEETING_PORT || 5000;
 server.listen(PORT, () =>
   console.log(`🚀 Meeting server running on http://localhost:${PORT}`)
 );

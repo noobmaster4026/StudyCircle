@@ -10,7 +10,7 @@
  * Phosphor green on charcoal. Monospace precision. Confident.
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -327,7 +327,7 @@ function QuizInterface({ quiz, onFinish }) {
   const [current,  setCurrent]  = useState(0);
   const [answers,  setAnswers]  = useState({});   // { qIndex: selectedLabel }
   const [revealed, setRevealed] = useState(false); // show answer for current Q
-  const { seconds, fmt, reset } = useTimer(true);
+  const { seconds, fmt } = useTimer(true);
   const totalQ = quiz.questions.length;
   const q      = quiz.questions[current];
   const typed  = useTypewriter(q.question, 15, !revealed && Object.keys(answers).length <= current);

@@ -4,9 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 require('dotenv').config({ path: path.join(__dirname, '.env') });
-if (!process.env.GEMINI_API_KEY) {
-    require('dotenv').config({ path: 'D:\\470\\470\\server\\.env' });
-}
+require('dotenv').config({ path: path.join(__dirname, '..', 'server', '.env') });
 
 const connectDB = require('./src/config/db');
 const routes = require('./src/routes/routes');
@@ -26,6 +24,7 @@ const doubtSolverRoutes = require('./src/routes/doubtSolverRoutes');
 const studyStreakRoutes = require('./src/routes/studyStreakRoutes');
 const resourceBookmarkRoutes = require('./src/routes/resourceBookmarkRoutes');
 const aiScheduleRoutes = require('./src/routes/aiScheduleRoutes');
+const chatbotRoutes = require('./src/routes/chatbotRoutes');
 
 const app = express();
 const quizRoutes = require('./src/routes/quizRoutes');
@@ -49,6 +48,7 @@ app.use('/api/doubt-solver', doubtSolverRoutes);
 app.use('/api/study-streaks', studyStreakRoutes);
 app.use('/api/resource-bookmarks', resourceBookmarkRoutes);
 app.use('/api/ai-schedules', aiScheduleRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 // Route Registration
 app.use('/api/recommendations', recommendationRoutes);

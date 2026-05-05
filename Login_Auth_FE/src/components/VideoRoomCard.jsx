@@ -54,7 +54,7 @@ const VideoRoomCard = ({ accentColor = "#6366f1" }) => {
         borderRadius: 12,
         display: "flex", alignItems: "center", justifyContent: "center",
         marginBottom: 16,
-        boxShadow: "0 6px 16px rgba(99,102,241,0.3)",
+        boxShadow: `0 6px 16px ${accentColor}55`,
       }}>
         <Video size={20} color="white" />
       </div>
@@ -86,7 +86,7 @@ const VideoRoomCard = ({ accentColor = "#6366f1" }) => {
         </div>
         <div style={{
           display: "flex", alignItems: "center", gap: 4,
-          color: "#6366f1", fontSize: 13, fontWeight: 600,
+          color: accentColor, fontSize: 13, fontWeight: 600,
         }}>
           Enter <ArrowRight size={13} />
         </div>

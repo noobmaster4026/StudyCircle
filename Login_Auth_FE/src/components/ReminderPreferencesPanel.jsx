@@ -66,6 +66,15 @@ const ReminderPreferencesPanel = ({ onClose }) => {
 
     return (
         <div style={panel}>
+            {onClose && (
+                <button
+                    onClick={onClose}
+                    aria-label="Close reminder preferences"
+                    style={{ float: 'right', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.55)', cursor: 'pointer' }}
+                >
+                    ✕
+                </button>
+            )}
             <p style={sectionTitle}>🔔 Reminder Timing</p>
             {REMINDER_OPTIONS.map(opt => (
                 <label key={opt.value} style={label}>

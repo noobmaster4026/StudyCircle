@@ -41,7 +41,7 @@ const NotesPage = () => {
     try {
       await axios.delete("http://localhost:3001/api/notes/" + noteId);
       setNotes((prev) => prev.filter((note) => note._id !== noteId));
-    } catch (err) {
+    } catch {
       alert("Failed to delete note. You may not have permission.");
     }
   };

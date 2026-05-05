@@ -33,8 +33,8 @@ const QuizGenerator = () => {
         <div>
             <h1>Quiz Generator</h1>
             <div className="tab">
-                <button onClick={() => handleTabChange('fromNote')}>From Note</button>
-                <button onClick={() => handleTabChange('fromText')}>From Text</button>
+                <button disabled={tab === 'fromNote'} onClick={() => handleTabChange('fromNote')}>From Note</button>
+                <button disabled={tab === 'fromText'} onClick={() => handleTabChange('fromText')}>From Text</button>
             </div>
             <div>
                 <label>

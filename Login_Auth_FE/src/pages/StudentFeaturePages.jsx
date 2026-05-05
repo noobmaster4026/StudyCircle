@@ -12,8 +12,11 @@ function useStoredList(key, initialValue) {
   });
 
   const saveItems = (next) => {
-    setItems(next);
-    localStorage.setItem(key, JSON.stringify(next));
+    setItems((current) => {
+      const resolved = typeof next === "function" ? next(current) : next;
+      localStorage.setItem(key, JSON.stringify(resolved));
+      return resolved;
+    });
   };
 
   return [items, saveItems];
@@ -67,30 +70,35 @@ export function DoubtSolverPage() {
       subject: form.subject.trim() || "General",
     };
 
-    setMessages([userMessage, ...messages]);
+    setMessages((current) => [userMessage, ...current]);
     setLoading(true);
     setError("");
 
     try {
+      const payload = {
+        subject: form.subject.trim(),
+        question: form.question.trim(),
+        context: form.context.trim(),
+      };
       const res = await fetch(`${API_BASE}/doubt-solver/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Unable to solve this doubt.");
+      if (!data.answer?.trim()) throw new Error("The AI returned an empty answer. Please try again.");
 
       const answerMessage = {
         id: `a-${Date.now()}`,
         role: "ai",
-        text: data.answer,
+        text: data.answer.trim(),
         subject: userMessage.subject,
       };
-      setMessages([answerMessage, userMessage, ...messages]);
+      setMessages((current) => [answerMessage, ...current]);
       setForm({ subject: form.subject, question: "", context: "" });
     } catch (err) {
       setError(err.message);
-      setMessages([userMessage, ...messages]);
     } finally {
       setLoading(false);
     }

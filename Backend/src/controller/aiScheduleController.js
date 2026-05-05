@@ -8,6 +8,14 @@ function geminiModelCandidates() {
   return [...new Set(models)];
 }
 
+function openRouterModel() {
+  return (process.env.OPENROUTER_SCHEDULER_MODEL || process.env.OPENROUTER_MODEL || 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free').trim();
+}
+
+function getOpenRouterApiKey() {
+  return typeof process.env.OPENROUTER_API_KEY === 'string' ? process.env.OPENROUTER_API_KEY.trim() : '';
+}
+
 function getGeminiApiKey() {
   return typeof process.env.GEMINI_API_KEY === 'string' ? process.env.GEMINI_API_KEY.trim() : '';
 }
@@ -116,6 +124,46 @@ function extractGeminiText(data) {
   return text;
 }
 
+function extractOpenRouterText(data) {
+  const text = data?.choices?.[0]?.message?.content || '';
+  const cleaned = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  if (!cleaned) throw new Error('Empty response from OpenRouter.');
+  return cleaned;
+}
+
+async function openRouterGenerate(prompt) {
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${getOpenRouterApiKey()}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://studycircle.app',
+      'X-Title': 'StudyCircle AI Scheduler',
+    },
+    body: JSON.stringify({
+      model: openRouterModel(),
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 4000,
+      temperature: 0.65,
+      response_format: { type: 'json_object' },
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.error?.message || response.statusText || 'OpenRouter request failed');
+  return data;
+}
+
+async function callOpenRouter(prompt) {
+  if (!getOpenRouterApiKey()) {
+    const err = new Error('OPENROUTER_API_KEY_MISSING');
+    err.code = 'OPENROUTER_API_KEY_MISSING';
+    throw err;
+  }
+
+  const data = await openRouterGenerate(prompt);
+  return { schedule: parseScheduleJson(extractOpenRouterText(data)), modelUsed: openRouterModel() };
+}
+
 async function geminiGenerate(model, prompt, useJsonMime) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(getGeminiApiKey())}`;
   const response = await fetch(url, {
@@ -157,6 +205,11 @@ async function callGemini(prompt) {
   throw new Error(`All Gemini attempts failed. ${attempts.join(' | ')}`);
 }
 
+async function callSchedulerAi(prompt) {
+  if (getOpenRouterApiKey()) return callOpenRouter(prompt);
+  return callGemini(prompt);
+}
+
 async function generateSchedule(req, res) {
   try {
     const userId = req.body.userId;
@@ -193,12 +246,12 @@ async function generateSchedule(req, res) {
 
     let output;
     try {
-      output = await callGemini(buildPrompt(inputs));
+      output = await callSchedulerAi(buildPrompt(inputs));
     } catch (err) {
-      if (err.code === 'GEMINI_API_KEY_MISSING') {
-        return res.status(503).json({ message: 'AI schedule generation is not configured. Set GEMINI_API_KEY on the Backend server.' });
+      if (err.code === 'OPENROUTER_API_KEY_MISSING' || err.code === 'GEMINI_API_KEY_MISSING') {
+        return res.status(503).json({ message: 'AI schedule generation is not configured. Set OPENROUTER_API_KEY on the Backend server.' });
       }
-      console.error('Gemini scheduler error:', err.message);
+      console.error('AI scheduler error:', err.message);
       return res.status(502).json({ message: 'Could not generate a schedule from the AI service.', detail: err.message });
     }
 

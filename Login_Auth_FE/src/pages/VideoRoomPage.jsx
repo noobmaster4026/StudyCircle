@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Send, Copy, Check } from "lucide-react";
 import { FaUsers, FaChalkboardTeacher } from "react-icons/fa";
@@ -130,7 +130,11 @@ const VideoRoomPage = ({ socket }) => {
     socket.on("ice-candidate", async ({ candidate, from }) => {
       const pc = peersRef.current[from];
       if (pc && candidate) {
-        try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch {}
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (err) {
+          console.warn("Could not add ICE candidate", err);
+        }
       }
     });
 
@@ -198,7 +202,7 @@ const VideoRoomPage = ({ socket }) => {
   };
 
   // Remote video component
-  const RemoteVideo = ({ socketId, stream }) => {
+  const RemoteVideo = ({ stream }) => {
     const ref = useRef(null);
     useEffect(() => {
       if (ref.current && stream) ref.current.srcObject = stream;

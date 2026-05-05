@@ -82,7 +82,7 @@ export default function ScannerPage() {
       setTimeout(() => setShareMsg(''), 3000);
       setDocuments(prev => prev.map(d => d._id === updated._id ? updated : d));
       if (selected?._id === updated._id) setSelected(updated);
-    } catch (err) {
+    } catch {
       alert('Share toggle failed');
     }
   };

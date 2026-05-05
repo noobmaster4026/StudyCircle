@@ -618,7 +618,7 @@ export default function SharedWhiteboard() {
                 </div>
               ) : (
                 <ol style={css.historyList} aria-label="List of changes">
-                  {history.map((entry, i) => (
+                  {history.map((entry) => (
                     <li key={entry.id} style={css.historyItem}>
                       {/* Author avatar */}
                       <div style={{ ...css.histAvatar, background: entry.authorColor }}

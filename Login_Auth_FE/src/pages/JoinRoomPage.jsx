@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Video, Hash, Lock, ArrowRight, ArrowLeft, Plus } from "lucide-react";
 
 const MEETING_SERVER = "http://localhost:5000";
@@ -88,7 +87,7 @@ const JoinRoomPage = () => {
       <div style={{ position: "absolute", top: "10%", left: "15%", width: 400, height: 400, background: "radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: "10%", right: "15%", width: 300, height: 300, background: "radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
 
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{
+      <div style={{
         width: "100%", maxWidth: 480,
         background: "rgba(255,255,255,0.03)",
         border: "1px solid rgba(255,255,255,0.08)",
@@ -154,8 +153,8 @@ const JoinRoomPage = () => {
                   onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
               </div>
             </div>
-            {joinError && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: "#f87171", fontSize: 13, margin: 0 }}>{joinError}</motion.p>}
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleJoin} disabled={joinLoading} style={{
+            {joinError && <p style={{ color: "#f87171", fontSize: 13, margin: 0 }}>{joinError}</p>}
+            <button onClick={handleJoin} disabled={joinLoading} style={{
               width: "100%", padding: "14px",
               background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
               border: "none", borderRadius: 12, color: "white", fontSize: 15, fontWeight: 700,
@@ -164,7 +163,7 @@ const JoinRoomPage = () => {
               boxShadow: "0 8px 24px rgba(99,102,241,0.3)", opacity: joinLoading ? 0.7 : 1,
             }}>
               {joinLoading ? "Joining..." : <><span>Join Room</span><ArrowRight size={16} /></>}
-            </motion.button>
+            </button>
           </div>
         )}
 
@@ -202,8 +201,8 @@ const JoinRoomPage = () => {
               </div>
               <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, margin: '4px 0 0 0' }}>Participants will receive a reminder before the session starts.</p>
             </div>
-            {createError && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: "#f87171", fontSize: 13, margin: 0 }}>{createError}</motion.p>}
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleCreate} disabled={createLoading} style={{
+            {createError && <p style={{ color: "#f87171", fontSize: 13, margin: 0 }}>{createError}</p>}
+            <button onClick={handleCreate} disabled={createLoading} style={{
               width: "100%", padding: "14px",
               background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
               border: "none", borderRadius: 12, color: "white", fontSize: 15, fontWeight: 700,
@@ -212,13 +211,13 @@ const JoinRoomPage = () => {
               boxShadow: "0 8px 24px rgba(99,102,241,0.3)", opacity: createLoading ? 0.7 : 1,
             }}>
               {createLoading ? "Creating..." : <><span>Create Room</span><Plus size={16} /></>}
-            </motion.button>
+            </button>
             <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 12, textAlign: "center", margin: 0 }}>
               A unique Room ID will be generated automatically. Share it with participants.
             </p>
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 };
