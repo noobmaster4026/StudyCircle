@@ -209,6 +209,14 @@ function StudentDashboard() {
       action: () => navigate("/bookmarks"),
       btnText: "Open Bookmarks",
     },
+    {
+      num: "20. AI SCHEDULER",
+      title: "Plan Your Study",
+      desc: "Generate a personalized weekly study schedule from your courses, goals, preferred times, and deadlines.",
+      img: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/ai-schedule"),
+      btnText: "Open Scheduler",
+    },
   ];
 
   return (

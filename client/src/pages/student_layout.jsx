@@ -115,6 +115,15 @@ export default function StudentLayout({ children }) {
           <button
             type="button"
             className={`sd-sidebar-item ${
+              isActive('/ai-schedule') ? 'sd-sidebar-item-active' : ''
+            }`}
+            onClick={() => navigate('/ai-schedule')}
+          >
+            AI schedule
+          </button>
+          <button
+            type="button"
+            className={`sd-sidebar-item ${
               isActive('/tutor-marketplace') ? 'sd-sidebar-item-active' : ''
             }`}
             onClick={() => navigate('/tutor-marketplace')}

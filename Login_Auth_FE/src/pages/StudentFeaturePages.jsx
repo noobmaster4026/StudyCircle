@@ -19,11 +19,11 @@ function useStoredList(key, initialValue) {
   return [items, saveItems];
 }
 
-function PageShell({ title, desc, pill, children }) {
+function PageShell({ title, desc, pill, children, className = "" }) {
   const navigate = useNavigate();
 
   return (
-    <div className="feature-shell">
+    <div className={`feature-shell ${className}`.trim()}>
       <nav className="feature-topbar">
         <span className="feature-brand">StudyCircle</span>
         <button type="button" className="feature-back" onClick={() => navigate("/student")}>
@@ -166,40 +166,51 @@ export function StudyStreakPage() {
 
   const today = new Date().toISOString().slice(0, 10);
   const checkedInToday = streak?.studyDates?.includes(today);
+  const earnedBadges = (streak?.badges || []).filter((badge) => badge.earned);
 
   return (
-    <PageShell title="Study Streak Tracker & Achievement Badges" desc="Check in after studying, protect your streak, and unlock badges as your habits grow." pill={loading ? "Loading" : `${streak?.currentStreak || 0} day streak`}>
+    <PageShell className="study-journey-shell">
       {error && <p className="feature-error">{error}</p>}
-      <div className="feature-grid">
-        <section className="feature-card">
-          <h2>Today's progress</h2>
-          <div className="streak-number">{streak?.currentStreak || 0}</div>
-          <p className="feature-muted">Current consecutive study days</p>
-          <div className="feature-actions">
-            <button type="button" className="feature-btn" onClick={checkIn} disabled={checkedInToday}>{checkedInToday ? "Checked In Today" : "Check In"}</button>
-            <button type="button" className="feature-btn secondary" onClick={fetchStreak}>Refresh</button>
-          </div>
-        </section>
-        <section className="feature-card">
-          <h2>Stats</h2>
-          <div className="feature-grid three compact-stats">
-            <div className="feature-item"><strong>{streak?.totalDays || 0}</strong><p>Total study days</p></div>
-            <div className="feature-item"><strong>{streak?.longestStreak || 0}</strong><p>Longest streak</p></div>
-            <div className="feature-item"><strong>{streak?.lastCheckIn || "None"}</strong><p>Last check-in</p></div>
-          </div>
-        </section>
-      </div>
-      <section className="feature-card feature-spaced">
-        <h2>Achievement badges</h2>
-        <div className="badge-grid">
-          {(streak?.badges || []).map((badge) => (
-            <div key={badge.id} className={`badge-card ${badge.earned ? "earned" : ""}`}>
-              <strong>{badge.name}</strong>
-              <p>{badge.description}</p>
-              <span>{badge.earned ? "Earned" : "Locked"}</span>
-            </div>
-          ))}
+      <section className="study-journey">
+        <header className="study-journey-header">
+          <h1>Your Study Journey</h1>
+          <p>Consistency is key! Log your sessions daily to keep your flame burning and unlock badges.</p>
+        </header>
+
+        <div className="journey-stat-row">
+          <article className="journey-stat-card current">
+            <span className="journey-stat-icon" aria-hidden="true">🔥</span>
+            <strong>{streak?.currentStreak || 0}</strong>
+            <p>Day Streak</p>
+          </article>
+          <article className="journey-stat-card longest">
+            <span className="journey-stat-icon" aria-hidden="true">⚡</span>
+            <strong>{streak?.longestStreak || 0}</strong>
+            <p>Longest Streak</p>
+          </article>
         </div>
+
+        <section className="journey-badges-panel">
+          <h2>Achievement Badges</h2>
+          {earnedBadges.length === 0 ? (
+            <p className="journey-empty">You haven't earned any badges yet. Start studying to unlock them!</p>
+          ) : (
+            <div className="journey-earned-grid">
+              {earnedBadges.map((badge) => (
+                <div key={badge.id} className="journey-earned-badge">
+                  <strong>{badge.name}</strong>
+                  <p>{badge.description}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <button type="button" className="journey-session-btn" onClick={checkIn} disabled={checkedInToday || loading}>
+          <span aria-hidden="true">🎓</span>
+          {checkedInToday ? "Study Session Finished Today" : "Simulate Finishing a Study Session"}
+        </button>
+        <p className="journey-note">(In the real app, this happens automatically when you finish a pomodoro or class!)</p>
       </section>
     </PageShell>
   );

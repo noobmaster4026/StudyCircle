@@ -20,6 +20,7 @@ import RecommendationsPage from "./pages/RecommendationsPage";
 import SharedWhiteboard from "./components/whiteboard/SharedWhiteboard";
 import ParticleBackground from "./components/ParticleBackground";
 import AnalyticsPage from './pages/AnalyticsPage';
+import AiSchedulePage from './pages/AiSchedulePage';
 import {
   PeerRatingsPage,
   ResourceBookmarksPage,
@@ -84,6 +85,7 @@ function App() {
         <Route path="/doubt-solver" element={<DoubtSolverPage />} />
         <Route path="/study-streak" element={<StudyStreakPage />} />
         <Route path="/bookmarks" element={<ResourceBookmarksPage />} />
+        <Route path="/ai-schedule" element={<AiSchedulePage />} />
       </Routes>
     </BrowserRouter>
   );

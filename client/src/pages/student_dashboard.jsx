@@ -187,6 +187,15 @@ export default function StudentDashboard() {
           <strong>Book a tutor</strong>
           <span>Find teachers by course offer and tuition fee.</span>
         </button>
+        <button
+          type="button"
+          className="sd-feature-card"
+          onClick={() => navigate('/ai-schedule')}
+        >
+          <span className="sd-feature-label">AI planner</span>
+          <strong>Generate a study schedule</strong>
+          <span>Build a saved weekly plan from your courses, goals, and deadlines.</span>
+        </button>
       </div>
 
       <div className="sd-course-columns">

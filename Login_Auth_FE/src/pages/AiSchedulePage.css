@@ -1,0 +1,168 @@
+.ai-schedule-page {
+  max-width: 1180px;
+}
+
+.ai-schedule-grid {
+  grid-template-columns: minmax(320px, 0.85fr) minmax(420px, 1.25fr);
+}
+
+.ai-check-list,
+.ai-check-grid {
+  display: grid;
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+}
+
+.ai-check-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.ai-check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  color: #334155;
+  background: #f8fafc;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.ai-check-row input {
+  margin-top: 0.15rem;
+  accent-color: #4f46e5;
+}
+
+.ai-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.ai-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ai-deadlines {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ai-deadline {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.8fr) minmax(180px, 1.3fr) auto;
+  gap: 0.55rem;
+}
+
+.ai-deadline input,
+.ai-deadline select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.7rem 0.85rem;
+  background: #fff;
+}
+
+.ai-generate-btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.feature-success {
+  border: 2px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  background: #f0fdf4;
+  color: #166534;
+  font-weight: 800;
+}
+
+.ai-summary {
+  color: #475569;
+  line-height: 1.6;
+}
+
+.ai-week-card {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 2px solid #e0e7ff;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.ai-week-card h3,
+.ai-day-card strong {
+  color: #3730a3;
+}
+
+.ai-day-card {
+  margin-top: 0.8rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed #cbd5e1;
+}
+
+.ai-day-card p {
+  display: flex;
+  gap: 0.7rem;
+  margin: 0.45rem 0 0;
+  color: #334155;
+}
+
+.ai-day-card p span {
+  min-width: 58px;
+  color: #4f46e5;
+  font-weight: 800;
+}
+
+.ai-tips {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.ai-history {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 2px solid #e2e8f0;
+}
+
+.ai-history-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: #fff;
+  color: #111827;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ai-history-item.active {
+  border-color: #4f46e5;
+  background: #eef2ff;
+}
+
+.ai-history-item small {
+  color: #64748b;
+}
+
+@media (max-width: 860px) {
+  .ai-schedule-grid,
+  .ai-two-col,
+  .ai-deadline {
+    grid-template-columns: 1fr;
+  }
+}

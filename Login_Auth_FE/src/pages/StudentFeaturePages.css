@@ -262,6 +262,187 @@
   color: #166534;
 }
 
+.study-journey-shell {
+  background: #f8fafc;
+}
+
+.study-journey-shell .feature-page {
+  max-width: 1000px;
+}
+
+.study-journey-shell .feature-hero {
+  display: none;
+}
+
+.study-journey {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 9rem);
+  text-align: center;
+}
+
+.study-journey-header {
+  margin-bottom: 2rem;
+}
+
+.study-journey-header h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.study-journey-header p {
+  margin: 0.65rem 0 0;
+  color: #334155;
+  font-size: 1.05rem;
+  letter-spacing: 0;
+}
+
+.journey-stat-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 230px));
+  gap: 1.85rem;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 2.5rem;
+}
+
+.journey-stat-card {
+  min-height: 143px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  color: #fff;
+  box-shadow: 0 18px 30px rgba(79, 70, 229, 0.14);
+}
+
+.journey-stat-card.current {
+  background: linear-gradient(135deg, #fb8d9a 0%, #f8c5e7 100%);
+}
+
+.journey-stat-card.longest {
+  background: linear-gradient(135deg, #a58bd1 0%, #dda7dc 100%);
+}
+
+.journey-stat-icon {
+  display: block;
+  height: 42px;
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.journey-stat-card strong {
+  margin-top: 0.2rem;
+  color: #fff;
+  font-size: 2.25rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.journey-stat-card p {
+  margin: 0.7rem 0 0;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 0.88rem;
+  font-weight: 850;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.journey-badges-panel {
+  width: min(100%, 800px);
+  min-height: 218px;
+  margin-bottom: 2.5rem;
+  border-radius: 15px;
+  background: #fff;
+  padding: 3.35rem 1.9rem 2.25rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+}
+
+.journey-badges-panel h2 {
+  position: relative;
+  margin: 0 0 3rem;
+  color: #334155;
+  font-size: 1.5rem;
+  font-weight: 850;
+}
+
+.journey-badges-panel h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.9rem;
+  height: 2px;
+  background: #e2e8f0;
+}
+
+.journey-empty {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 1.05rem;
+  font-style: italic;
+}
+
+.journey-earned-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.85rem;
+  text-align: left;
+}
+
+.journey-earned-badge {
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  background: #f0fdf4;
+  padding: 1rem;
+}
+
+.journey-earned-badge strong {
+  color: #166534;
+}
+
+.journey-earned-badge p {
+  margin: 0.35rem 0 0;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.journey-session-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-width: 405px;
+  min-height: 53px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #5d7ff0 0%, #814db5 100%);
+  color: #fff;
+  padding: 0.85rem 2rem;
+  box-shadow: 0 12px 20px rgba(79, 70, 229, 0.24);
+  cursor: pointer;
+  font-size: 1.08rem;
+  font-weight: 900;
+}
+
+.journey-session-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.74;
+}
+
+.journey-note {
+  margin: 1.1rem 0 0;
+  color: #64748b;
+  font-size: 0.84rem;
+}
+
 .bookmark-toolbar {
   margin-bottom: 1rem;
 }
@@ -306,5 +487,43 @@
   .bookmark-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .journey-stat-row {
+    grid-template-columns: 1fr;
+    max-width: 360px;
+    gap: 1rem;
+  }
+
+  .journey-session-btn {
+    min-width: 0;
+    width: min(100%, 405px);
+  }
+}
+
+@media (max-width: 560px) {
+  .study-journey-shell {
+    padding-inline: 1rem;
+  }
+
+  .study-journey-header h1 {
+    font-size: 1.65rem;
+  }
+
+  .study-journey-header p {
+    font-size: 0.95rem;
+  }
+
+  .journey-badges-panel {
+    padding: 2.35rem 1.1rem 1.8rem;
+  }
+
+  .journey-badges-panel h2 {
+    font-size: 1.25rem;
+  }
+
+  .journey-session-btn {
+    font-size: 0.95rem;
+    padding-inline: 1rem;
   }
 }

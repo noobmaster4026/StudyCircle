@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
+import ParticleBackground from '../components/ParticleBackground';
+import './ScannerPage.css';
 
 const API = 'http://localhost:3001/api/documents';
 
@@ -129,172 +131,180 @@ export default function ScannerPage() {
   });
 
   return (
-    <div className="page scanner-page">
-      <div className="page-header">
-        <h2>🔍 Document Scanner (OCR)</h2>
-      </div>
+    <div className="scanner-shell">
+      <ParticleBackground />
 
-      {shareMsg && <div className="share-toast">{shareMsg}</div>}
+      <main className="page scanner-page">
+        <div className="page-header scanner-header">
+          <div>
+            <span className="scanner-kicker">OCR workspace</span>
+            <h2>Document Scanner</h2>
+            <p>Upload an image, extract readable text, and share or download the result.</p>
+          </div>
+        </div>
 
-      <div className="scanner-layout">
+        {shareMsg && <div className="share-toast">{shareMsg}</div>}
 
-        {/* ── LEFT PANEL ── */}
-        <div className="scanner-left">
+        <div className="scanner-layout">
 
-          {/* Dropzone */}
-          <div {...getRootProps()} className={`dropzone ${isDragActive ? 'active' : ''} ${scanning ? 'disabled' : ''}`}>
-            <input {...getInputProps()} />
-            <div className="dropzone-content">
-              <span className="dropzone-icon">🖼️</span>
-              <p>{isDragActive ? 'Drop the image here!' : 'Drag & drop an image, or click to select'}</p>
-              <span className="dropzone-hint">JPG, PNG, WEBP — Max 20MB</span>
+          {/* ── LEFT PANEL ── */}
+          <div className="scanner-left">
+
+            {/* Dropzone */}
+            <div {...getRootProps()} className={`dropzone ${isDragActive ? 'active' : ''} ${scanning ? 'disabled' : ''}`}>
+              <input {...getInputProps()} />
+              <div className="dropzone-content">
+                <span className="dropzone-icon">IMG</span>
+                <p>{isDragActive ? 'Drop the image here' : 'Drag and drop an image, or click to select'}</p>
+                <span className="dropzone-hint">JPG, PNG, WEBP - max 20MB</span>
+              </div>
             </div>
+
+            {/* Progress bar */}
+            {scanning && (
+              <div className="scan-progress">
+                <div className="progress-header">
+                  <span>Running OCR... this may take 10-20 seconds</span>
+                  <span>{progress}%</span>
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: `${progress}%` }} />
+                </div>
+              </div>
+            )}
+
+            {/* Result — image + OCR text below */}
+            {selected && !scanning && (
+              <div className="result-panel">
+
+                {/* File info */}
+                <div className="result-header">
+                  <div>
+                    <h4>{selected.originalName}</h4>
+                    <div className="result-meta">
+                      <span className="file-type-badge">IMAGE</span>
+                      <span>{formatSize(selected.fileSize)}</span>
+                      <span>{formatDate(selected.createdAt)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Original image */}
+                <div className="file-preview-area">
+                  <img
+                    src={selected.fileUrl}
+                    alt={selected.originalName}
+                    className="img-full-preview"
+                  />
+                </div>
+
+                {/* OCR extracted text shown directly below */}
+                <div className="ocr-text-section">
+                  <div className="ocr-text-header">
+                    <h5>Extracted Text</h5>
+                    <div className="result-buttons">
+                      <button className="btn-secondary" onClick={handleCopyText}>
+                        {copyMsg || 'Copy'}
+                      </button>
+                      <button className="btn-secondary" onClick={handleDownload}>
+                        Download .txt
+                      </button>
+                      <button
+                        className={selected.isShared ? 'btn-shared' : 'btn-primary'}
+                        onClick={() => handleToggleShare(selected)}
+                      >
+                        {selected.isShared ? 'Disable Sharing' : 'Share'}
+                      </button>
+                      {selected.isShared && (
+                        <button className="btn-secondary" onClick={() => handleCopyLink(selected)}>
+                          Copy Link
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="ocr-text-box">
+                    {selected.extractedText}
+                  </div>
+
+                  {/* Share link */}
+                  {selected.isShared && (
+                    <div className="share-link-box">
+                      <span>Anyone with this link can view:</span>
+                      <code>{window.location.origin}/share/{selected.shareToken}</code>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+
+            {/* Empty state */}
+            {!selected && !scanning && (
+              <div className="scanner-empty">
+                <span>OCR</span>
+                <p>Upload an image to scan and extract text</p>
+              </div>
+            )}
           </div>
 
-          {/* Progress bar */}
-          {scanning && (
-            <div className="scan-progress">
-              <div className="progress-header">
-                <span>🔍 Running OCR... this may take 10–20 seconds</span>
-                <span>{progress}%</span>
-              </div>
-              <div className="progress-bar">
-                <div className="progress-fill" style={{ width: `${progress}%` }} />
-              </div>
-            </div>
-          )}
+          {/* ── RIGHT PANEL — History ── */}
+          <div className="scanner-right">
+            <h4>Document History</h4>
+            <input
+              className="search-input"
+              placeholder="Search scans..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
 
-          {/* Result — image + OCR text below */}
-          {selected && !scanning && (
-            <div className="result-panel">
-
-              {/* File info */}
-              <div className="result-header">
-                <div>
-                  <h4>🖼️ {selected.originalName}</h4>
-                  <div className="result-meta">
-                    <span className="file-type-badge">IMAGE</span>
-                    <span>{formatSize(selected.fileSize)}</span>
-                    <span>{formatDate(selected.createdAt)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Original image */}
-              <div className="file-preview-area">
-                <img
-                  src={selected.fileUrl}
-                  alt={selected.originalName}
-                  className="img-full-preview"
-                />
-              </div>
-
-              {/* OCR extracted text shown directly below */}
-              <div className="ocr-text-section">
-                <div className="ocr-text-header">
-                  <h5>📝 Extracted Text</h5>
-                  <div className="result-buttons">
-                    <button className="btn-secondary" onClick={handleCopyText}>
-                      {copyMsg || '📋 Copy'}
-                    </button>
-                    <button className="btn-secondary" onClick={handleDownload}>
-                      ⬇️ Download .txt
-                    </button>
-                    <button
-                      className={selected.isShared ? 'btn-shared' : 'btn-primary'}
-                      onClick={() => handleToggleShare(selected)}
-                    >
-                      {selected.isShared ? '🔒 Disable Sharing' : '🔗 Share'}
-                    </button>
-                    {selected.isShared && (
-                      <button className="btn-secondary" onClick={() => handleCopyLink(selected)}>
-                        📎 Copy Link
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="ocr-text-box">
-                  {selected.extractedText}
-                </div>
-
-                {/* Share link */}
-                {selected.isShared && (
-                  <div className="share-link-box">
-                    <span>🌐 Anyone with this link can view:</span>
-                    <code>{window.location.origin}/share/{selected.shareToken}</code>
-                  </div>
-                )}
-              </div>
-
-            </div>
-          )}
-
-          {/* Empty state */}
-          {!selected && !scanning && (
-            <div className="scanner-empty">
-              <span>⬆️</span>
-              <p>Upload an image to scan and extract text</p>
-            </div>
-          )}
-        </div>
-
-        {/* ── RIGHT PANEL — History ── */}
-        <div className="scanner-right">
-          <h4>📂 Document History</h4>
-          <input
-            className="search-input"
-            placeholder="🔎 Search scans..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
-
-          {filtered.length === 0 ? (
-            <p className="empty-msg" style={{ marginTop: '1rem', fontSize: '0.9rem' }}>
-              No scans yet. Upload an image to get started!
-            </p>
-          ) : (
-            <div className="doc-list">
-              {filtered.map(doc => (
-                <div
-                  key={doc._id}
-                  className={`doc-item ${selected?._id === doc._id ? 'active' : ''}`}
-                  onClick={() => setSelected(doc)}
-                >
-                  {/* Image thumbnail */}
-                  <div className="doc-thumb">
-                    <img
-                      src={doc.fileUrl}
-                      alt={doc.originalName}
-                      className="thumb-img"
-                    />
-                  </div>
-
-                  {/* Info */}
-                  <div className="doc-item-info">
-                    <span className="doc-name">{doc.originalName}</span>
-                    <div className="doc-item-badges">
-                      <span className="file-type-badge sm">IMAGE</span>
-                      {doc.isShared && <span className="shared-badge">🔗 Shared</span>}
+            {filtered.length === 0 ? (
+              <p className="empty-msg">
+                No scans yet. Upload an image to get started.
+              </p>
+            ) : (
+              <div className="doc-list">
+                {filtered.map(doc => (
+                  <div
+                    key={doc._id}
+                    className={`doc-item ${selected?._id === doc._id ? 'active' : ''}`}
+                    onClick={() => setSelected(doc)}
+                  >
+                    {/* Image thumbnail */}
+                    <div className="doc-thumb">
+                      <img
+                        src={doc.fileUrl}
+                        alt={doc.originalName}
+                        className="thumb-img"
+                      />
                     </div>
-                    <span className="doc-date">{formatDate(doc.createdAt)}</span>
-                    <span className="doc-preview-text">
-                      {doc.extractedText.substring(0, 50)}...
-                    </span>
+
+                    {/* Info */}
+                    <div className="doc-item-info">
+                      <span className="doc-name">{doc.originalName}</span>
+                      <div className="doc-item-badges">
+                        <span className="file-type-badge sm">IMAGE</span>
+                        {doc.isShared && <span className="shared-badge">Shared</span>}
+                      </div>
+                      <span className="doc-date">{formatDate(doc.createdAt)}</span>
+                      <span className="doc-preview-text">
+                        {doc.extractedText.substring(0, 50)}...
+                      </span>
+                    </div>
+
+                    {/* Delete */}
+                    <button
+                      className="btn-icon danger"
+                      onClick={e => { e.stopPropagation(); handleDelete(doc._id); }}
+                    >Delete</button>
                   </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-                  {/* Delete */}
-                  <button
-                    className="btn-icon danger"
-                    onClick={e => { e.stopPropagation(); handleDelete(doc._id); }}
-                  >🗑️</button>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
-
-      </div>
+      </main>
     </div>
   );
 }

@@ -10,6 +10,7 @@ import StudySession from './pages/studySession'
 import TutorMarketplace from './pages/tutorMarketplace'
 import ManageCourse from './pages/manageCourse'
 import ManageBookings from './pages/manageBookings'
+import AiStudySchedule from './pages/ai'
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/study-session" element={<StudySession />} />
         <Route path="/tutor-marketplace" element={<TutorMarketplace />} />
+        <Route path="/ai-schedule" element={<AiStudySchedule />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
     </>
