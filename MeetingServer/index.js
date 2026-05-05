@@ -28,6 +28,9 @@ const io = new Server(server, {
   cors: { origin: "*", methods: ["GET", "POST"] },
 });
 
+const { attachWhiteboardNamespace } = require("./whiteboard/whiteboardNamespace");
+attachWhiteboardNamespace(io);
+
 io.on("connection", (socket) => {
   console.log(`🔌 Connected: ${socket.id}`);
 

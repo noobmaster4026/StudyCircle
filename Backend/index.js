@@ -9,6 +9,8 @@ const Goal = require('./src/models/goal');
 const Flashcard = require('./src/models/Flashcard');
 const courseRoutes = require("./src/routes/courseRoutes");
 const indInfoRoutes = require("./src/routes/indInfoRoutes");
+const quizRoutes = require("./src/routes/quizRoutes");
+const studyGroupRoutes = require("./src/routes/studyGroupRoutes");
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
@@ -20,6 +22,8 @@ app.use(express.json());
 app.use("/api", routes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/ind-infos", indInfoRoutes);
+app.use("/api/quiz", quizRoutes);
+app.use("/api/study-groups", studyGroupRoutes);
 
 // Login
 app.post("/api/login", async (req, res) => {

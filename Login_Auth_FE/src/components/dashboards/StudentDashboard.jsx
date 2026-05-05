@@ -198,6 +198,33 @@ function StudentDashboard() {
       btnText: "View Progress",
       type: "regular",
     },
+    {
+      num: "06. STUDY GROUPS",
+      title: "Find Your Group",
+      desc: "Get auto-matched into study groups based on your courses, schedule, goals, and study style.",
+      img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2671&auto=format&fit=crop",
+      action: () => navigate("/study-groups"),
+      btnText: "Explore Groups",
+      type: "regular",
+    },
+    {
+      num: "07. WHITEBOARD",
+      title: "Think Visually",
+      desc: "Draw, annotate, add sticky notes, and collaborate with classmates in real time on a shared board.",
+      img: "https://images.unsplash.com/photo-1507209575474-fa818c2f4e46?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/whiteboard/shared-board"),
+      btnText: "Open Whiteboard",
+      type: "regular",
+    },
+    {
+      num: "08. AI QUIZ",
+      title: "Test Yourself",
+      desc: "Generate custom AI quizzes by topic, difficulty, question count, and type with instant explanations.",
+      img: "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?q=80&w=2670&auto=format&fit=crop",
+      action: () => navigate("/quizzes"),
+      btnText: "Generate Quiz",
+      type: "regular",
+    },
   ];
 
   return (

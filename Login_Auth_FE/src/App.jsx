@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import Register from "./components/auth/Register";
 import Login from "./components/auth/Login";
@@ -10,7 +10,10 @@ import FlashcardsPage from "./pages/FlashcardsPage";
 import PomodoroPage from "./pages/PomodoroPage";
 import JoinRoomPage from "./pages/JoinRoomPage";
 import VideoRoomPage from "./pages/VideoRoomPage";
-import NotesPage from "./pages/NotesPage";   // ← add this
+import NotesPage from "./pages/NotesPage";
+import QuizzesPage from "./pages/QuizzesPage";
+import StudyGroups from "./pages/StudyGroupsPage";
+import SharedWhiteboard from "./components/whiteboard/SharedWhiteboard";
 import "./App.css";
 
 const meetSocket = io("http://localhost:5000", {
@@ -30,10 +33,14 @@ function App() {
         <Route path="/flashcards" element={<FlashcardsPage />} />
         <Route path="/pomodoro" element={<PomodoroPage />} />
         <Route path="/notes" element={<NotesPage />} />         {/* ← add this */}
+        <Route path="/quizzes" element={<QuizzesPage />} />
+        <Route path="/study-groups" element={<StudyGroups />} />
         <Route path="/join-room" element={<JoinRoomPage />} />
         <Route path="/video-rooms" element={<JoinRoomPage />} />
         <Route path="/study-rooms" element={<JoinRoomPage />} />
         <Route path="/room/:id" element={<VideoRoomPage socket={meetSocket} />} />
+        <Route path="/whiteboard" element={<Navigate to="/whiteboard/shared-board" replace />} />
+        <Route path="/whiteboard/:roomId" element={<SharedWhiteboard />} />
       </Routes>
     </BrowserRouter>
   );
