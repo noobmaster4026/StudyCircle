@@ -1044,3 +1044,151 @@ body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b;
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ─────────────────────────────────────────
+   ANALYTICS PAGE
+───────────────────────────────────────── */
+.analytics-page { max-width: 1100px; }
+.analytics-header-actions { display: flex; gap: 0.75rem; }
+
+/* Period tabs */
+.period-tabs {
+  display: flex; gap: 0.5rem;
+  margin-bottom: 1.5rem; flex-wrap: wrap;
+}
+.period-tab {
+  padding: 0.45rem 1.1rem; border-radius: 8px;
+  border: 2px solid #e2e8f0; background: white;
+  cursor: pointer; font-weight: 600; color: #64748b;
+  transition: all 0.2s;
+}
+.period-tab:hover  { border-color: #6366f1; color: #6366f1; }
+.period-tab.active { background: #6366f1; border-color: #6366f1; color: white; }
+
+/* Log session form */
+.log-session-form {
+  background: white; border: 2px solid #e2e8f0;
+  border-radius: 16px; padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.log-session-form h4 { margin-bottom: 1rem; font-size: 1.05rem; }
+.log-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem; margin-bottom: 1rem;
+}
+.log-field { display: flex; flex-direction: column; gap: 0.4rem; }
+.log-field label { font-size: 0.85rem; font-weight: 600; color: #475569; }
+.log-field input,
+.log-field select {
+  padding: 0.55rem 0.8rem; border: 2px solid #e2e8f0;
+  border-radius: 8px; font-size: 0.9rem; font-family: inherit;
+  transition: border-color 0.2s;
+}
+.log-field input:focus,
+.log-field select:focus { border-color: #6366f1; outline: none; }
+.split-input { display: flex; gap: 0.4rem; }
+.split-input input { flex: 1; }
+.checkbox-field { justify-content: flex-end; }
+.checkbox-field label {
+  display: flex; align-items: center;
+  gap: 0.5rem; cursor: pointer; font-weight: 600;
+}
+.log-actions { display: flex; gap: 0.75rem; }
+
+/* Dashboard wrapper */
+.dashboard { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* Stat cards */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.stat-card {
+  border-radius: 14px; padding: 1.25rem;
+  display: flex; align-items: center; gap: 1rem;
+  border: 2px solid transparent;
+}
+.stat-card.blue   { background: #eef2ff; border-color: #c7d2fe; }
+.stat-card.green  { background: #f0fdf4; border-color: #bbf7d0; }
+.stat-card.purple { background: #faf5ff; border-color: #e9d5ff; }
+.stat-card.orange { background: #fffbeb; border-color: #fde68a; }
+.stat-card.teal   { background: #ecfeff; border-color: #a5f3fc; }
+.stat-icon { font-size: 2rem; }
+.stat-value { font-size: 1.6rem; font-weight: 800; color: #1e293b; line-height: 1; }
+.stat-label { font-size: 0.78rem; color: #64748b; font-weight: 600; margin-top: 0.2rem; }
+
+/* Chart rows */
+.charts-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.25rem;
+}
+@media (max-width: 768px) {
+  .charts-row { grid-template-columns: 1fr; }
+  .stat-cards { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Chart cards */
+.chart-card {
+  background: white; border: 2px solid #e2e8f0;
+  border-radius: 16px; padding: 1.25rem;
+}
+.chart-card h4 { font-size: 0.95rem; color: #1e293b; margin-bottom: 1rem; }
+.chart-card.wide { grid-column: span 1; }
+.chart-card.full-width { grid-column: 1 / -1; }
+.no-data { color: #94a3b8; font-size: 0.9rem; text-align: center; padding: 2rem 0; }
+
+/* Flashcard retention circle */
+.retention-display {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 1.25rem; padding: 0.5rem 0;
+}
+.retention-circle {
+  width: 130px; height: 130px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  padding: 4px;
+}
+.retention-inner {
+  background: white; border-radius: 50%;
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.retention-pct { font-size: 1.6rem; font-weight: 800; color: #6366f1; }
+.retention-lbl { font-size: 0.72rem; color: #94a3b8; font-weight: 600; }
+.retention-stats { display: flex; gap: 1.5rem; }
+.ret-stat { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+.ret-val { font-size: 1.2rem; font-weight: 700; color: #1e293b; }
+.ret-val.green { color: #16a34a; }
+.ret-val.red   { color: #dc2626; }
+.ret-key { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
+
+/* Pomodoro heatmap */
+.heatmap-grid {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  margin-bottom: 0.75rem;
+}
+.heatmap-cell {
+  width: 18px; height: 18px; border-radius: 3px;
+  cursor: default; transition: transform 0.1s;
+}
+.heatmap-cell:hover { transform: scale(1.3); }
+.heatmap-legend {
+  display: flex; align-items: center;
+  gap: 4px; font-size: 0.78rem; color: #94a3b8;
+}
+.legend-cell { width: 14px; height: 14px; border-radius: 2px; }
+
+/* Goal progress bar */
+.goal-bar-wrap { display: flex; flex-direction: column; gap: 0.6rem; }
+.goal-bar-bg {
+  height: 18px; background: #f1f5f9;
+  border-radius: 99px; overflow: hidden;
+}
+.goal-bar-fill {
+  height: 100%; background: linear-gradient(90deg, #6366f1, #22c55e);
+  border-radius: 99px; transition: width 0.8s ease;
+}
+.goal-bar-label { font-size: 0.88rem; color: #64748b; font-weight: 600; }

@@ -27,3 +27,6 @@ app.listen(process.env.PORT, () =>
 
 const recommendationRoutes = require('./routes/recommendations');
 app.use('/api/recommendations', recommendationRoutes);
+
+const analyticsRoutes = require('./routes/analytics');
+app.use('/api/analytics', analyticsRoutes);

@@ -6,6 +6,7 @@ import './App.css';
 import ScannerPage   from './pages/ScannerPage';
 import SharedDocPage from './pages/SharedDocPage';
 import RecommendationsPage from './pages/RecommendationsPage';
+import AnalyticsPage from './pages/AnalyticsPage';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Link to="/pomodoro">Pomodoro</Link>
           <Link to="/scanner">Scanner</Link>
           <Link to="/recommendations">Recommendations</Link>
+          <Link to="/analytics">Analytics</Link>
         </div>
       </nav>
       <Routes>
@@ -25,6 +27,7 @@ function App() {
         <Route path="/scanner" element={<ScannerPage />} />
         <Route path="/share/:token" element={<SharedDocPage />} />
         <Route path="/recommendations" element={<RecommendationsPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
       </Routes>
     </Router>
   );
